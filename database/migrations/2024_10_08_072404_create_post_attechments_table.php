@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Post;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,6 +14,11 @@ return new class extends Migration
     {
         Schema::create('post_attechments', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(Post::class)->constrained();
+            $table->string('name', 255);
+            $table->string('path', 255);
+            $table->string('mime', 255);
+            $table->foreignId('created_by')->nullable()->constrained('users');
             $table->timestamps();
         });
     }
