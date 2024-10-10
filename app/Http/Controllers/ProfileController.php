@@ -17,9 +17,20 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function index(Request $request) {
+    public function index(Request $request , $user) {
+
+        $data = User::findOrFail($user);
         return view('profile.index', [
-            'user' => $request->user(),
+            'user' => $data,
+        ]);
+    }
+
+    public function profilePost($user) {
+
+        $data = User::with('posts')->findOrFail($user);
+
+        return response()->json([
+            'data' => $data
         ]);
     }
 
@@ -30,7 +41,14 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function editAvatar(Request $request) {
+    public function editAvatar(Request $request, User $user) {
+
+        if ($user->id != $request->user()->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You do not have permission to edit this profile.'
+            ], 403);
+        }
 
         $type = $request->type;
 

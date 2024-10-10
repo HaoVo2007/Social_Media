@@ -56,4 +56,8 @@ class User extends Authenticatable
             ->generateSlugsFrom('name')
             ->saveSlugsTo('username');
     }
+
+    public function posts() {
+        return $this->hasMany(Post::class)->orderBy('created_at', 'desc');
+    }
 }
