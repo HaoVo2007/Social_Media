@@ -25,10 +25,16 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function profilePost($user) {
+    public function profilePost(Request $request, $user) {
+
+        $currentUser = $request->user();
 
         $data = User::with('posts')->findOrFail($user);
 
+        $data->posts->map(function($post) use ($currentUser) {
+            $post->check = $post->user_id == $currentUser->id;
+        });
+        
         return response()->json([
             'data' => $data
         ]);
