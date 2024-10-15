@@ -24,5 +24,9 @@ class Post extends Model
     public function attechments() {
         return $this->hasMany(PostAttechment::class);
     }
+
+    public function reactions() {
+        return $this->hasMany(PostReaction::class);
+    }
     
 }

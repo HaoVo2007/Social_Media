@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\PostAttechment;
+use App\Models\PostReaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,10 +14,16 @@ class PostController extends Controller
 
         $currentUser = $request->user();
     
-        $posts = Post::with('user')->with('attechments')->latest()->get();
-    
+        $posts = Post::with(['user', 'reactions', 'attechments'])
+            ->latest()
+            ->get();
+
         $postsWithOwnerCheck = $posts->map(function ($post) use ($currentUser) {
+
             $post->check_user = $currentUser && $post->user_id == $currentUser->id;
+            $post->currentReaction = $post->reactions->where('user_id', $currentUser->id)->isNotEmpty();
+            $post->totalLike = $post->reactions->where('type', 'like')->count();
+            
             return $post;
         });
     
@@ -27,7 +34,7 @@ class PostController extends Controller
     }
 
     public function store(Request $request) {
-        
+
         $body = $request->body;
 
         $post = Post::create([
@@ -152,5 +159,41 @@ class PostController extends Controller
             'status' => 'success',
             'message' => 'Post delete successfully',
         ]);
-    } 
+    }
+
+    public function reaction(Request $request, Post $post) {
+
+        $type = $request->type;
+
+        $check = PostReaction::where('user_id', $request->user()->id)
+                        ->where('post_id', $post->id)
+                        ->first();
+
+        if ($check) {
+
+            $check->delete();
+
+            $currentReaction = false;
+
+        } else {
+
+            PostReaction::create([
+                'post_id' => $post->id,
+                'user_id' => $request->user()->id,
+                'type' => $type,
+            ]);
+
+            $currentReaction = true;
+        }
+
+        $totalLike = PostReaction::where('post_id', $post->id)->count();
+
+        return response()->json([
+            'status' => 'success',
+            'currentReaction' => $currentReaction,
+            'totalLike' => $totalLike,
+        ]);
+
+    }
 }
+ 
