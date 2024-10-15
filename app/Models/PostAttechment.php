@@ -8,4 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class PostAttechment extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'post_id',
+        'name',
+        'path',
+        'mime',
+        'created_by'
+    ];
 }

@@ -1,7 +1,7 @@
 <x-app-layout>
 
     <style>
-        h1.ck-content  {
+        h1.ck-content {
             font-size: 28px;
             color: #333;
             font-weight: bold;
@@ -15,7 +15,7 @@
             margin-bottom: 12px;
         }
 
-        h3.ck-content  {
+        h3.ck-content {
             font-size: 20px;
             color: #555;
             font-weight: bold;
@@ -76,7 +76,7 @@
             padding-left: 20px;
         }
 
-        .ck-content li{
+        .ck-content li {
             margin-bottom: 5px;
         }
 
@@ -126,11 +126,18 @@
                         </div>
                     </div>
                     <!-- Modal footer -->
-                    <div
-                        class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                    <div class="flex gap-3 justify-end mr-5">
+                        <div class="relative">
+                            <button type="submit"
+                                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Attechment</button>
+                            <input data-type="2"
+                                class="btn-attechment w-[100px] pointer opacity-0 top-0 left-0 right-0 absolute px-2 py-1 border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                type="file" multiple name="">
+                        </div>
                         <button type="button" id="btn-edit-post"
-                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Edit</button>
+                            class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Edit</button>
                     </div>
+                    <div id="attachments-container" class="grid-cols-2 grid p-5 gap-5"></div>
                 </div>
             </div>
         </div>
@@ -140,7 +147,6 @@
                     src="/storage/{{ $user->cover_path ? $user->cover_path : '/uploads/covers/image.jpg' }}"
                     alt="" />
                 @if (Auth::user()->id === $user->id)
-                    c
                     <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                             class="relative top-0 right-0 bg-white text-gray-700 py-2 px-4 rounded-lg shadow-lg text-sm">
@@ -299,6 +305,8 @@
     <script src="https://cdn.ckeditor.com/ckeditor5/23.0.0/classic/ckeditor.js"></script>
     <script>
         let editor;
+        let images = [];
+        let filesArray = [];
 
         function uploadCover(type) {
             var id = $('#user-id').val();
@@ -416,15 +424,10 @@
 
                                         ${isLongContent ? `<button class="toggleBtn text-indigo-600 hover:text-indigo-500 font-semibold" data-index="${index}">Read more ...</button>` : ''}
                                     </div>
-                                    <div class="grid grid-cols-2 gap-3 px-5 py-5">
-                                        <img class="object-cover aspect-square" src="https://picsum.photos/1000" alt="">
-                                        <img class="object-cover aspect-square" src="https://picsum.photos/1000" alt="">
-                                        <div class="bg-blue-100 object-cover aspect-square flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-16">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                            </svg>
-                                            <h1 class="text-slate-500 text-sm">Document.doc</h1>
-                                        </div>
+                                    <div class="grid ${post.attechments.length == 1 ? 'grid-cols-1 justify-items-center align-items-center' : 'grid-cols-2'} gap-1 px-2 py-2">    
+                                    ${post.attechments && post.attechments.length > 0 ? post.attechments.map(attechment => `
+                                            <img class="${post.attechments.length == 1 ? 'w-1/2' : 'w-ful'} object-cover w-full aspect-square" src="/storage/${attechment.path}" alt="">
+                                        `).join('') : ''}
                                     </div>
                                     <div class="flex items-center gap-5 px-5 py-5">
                                         <button class="py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
@@ -494,6 +497,40 @@
             });
         }
 
+        function renderImages(type) {
+            if (type == 1) {
+                var previewContainer = $('#file-preview');
+                previewContainer.html('');
+            } else {
+                var previewContainer = $('#attachments-container');
+                previewContainer.html('');
+            }
+
+            // Hiển thị các ảnh đã chọn với nút xóa
+            images.forEach(function(image, index) {
+                var imageWrapper = $('<div>').addClass('relative');
+                var imgTag = $('<img>').attr('src', image).addClass('w-full rounded-lg border');
+
+                // Tạo nút xóa
+                var deleteButton = $('<button>')
+                    .addClass('absolute top-1 right-1 bg-red-600 text-white px-3 py-1 rounded-full text-sm')
+                    .text('X')
+                    .attr('data-index', index) // Gắn index của ảnh để dễ xóa
+                    .on('click', function() {
+                        deleteImage($(this).attr('data-index'), type);
+                    });
+
+                imageWrapper.append(imgTag).append(deleteButton);
+                previewContainer.append(imageWrapper);
+            });
+        }
+
+        function deleteImage(index, type) {
+            images.splice(index, 1); // Xóa ảnh khỏi mảng URL
+            filesArray.splice(index, 1); // Xóa file khỏi mảng file
+            renderImages(type); // Cập nhật lại danh sách ảnh hiển thị
+        }
+
         function showEditModal(id) {
             $.ajax({
                 url: '/post/edit/' + id,
@@ -511,6 +548,19 @@
                     $('#created-post').text(created_at);
                     $('#edit-post').val(response.data.body);
                     $('#post-id').val(response.data.id);
+
+                    const attachmentsContainer = $('#attachments-container');
+                    attachmentsContainer.empty();
+
+                    if (response.data.attechments && response.data.attechments.length > 0) {
+                        images = [];
+                        filesArray = [];
+                        response.data.attechments.forEach(attechment => {
+                            images.push(`/storage/${attechment.path}`);
+                        })
+                    }
+
+                    renderImages(2);
 
                     if (editor) {
                         editor.destroy()
@@ -577,6 +627,40 @@
                 $('.btn-group').show();
             });
 
+            $('.btn-attechment').on('change', function(event) {
+                var files = event.target.files;
+                var type = $(this).data('type');
+
+                if (type == 1) {
+                    var previewContainer = $('#file-preview');
+                } else {
+                    var previewContainer = $('#attachments-container');
+                }
+
+                // Lặp qua từng file đã chọn
+                Array.from(files).forEach(file => {
+                    // Kiểm tra nếu file là hình ảnh
+                    if (file.type.startsWith('image/')) {
+                        var reader = new FileReader();
+
+                        // Khi file được đọc xong
+                        reader.onload = function(e) {
+                            images.push(e.target.result); // Thêm URL ảnh vào mảng
+                            filesArray.push(file); // Thêm file thực tế vào mảng
+
+                            if (type == 1) {
+                                renderImages(1);
+                            } else {
+                                renderImages(2);
+                            }
+                        }
+
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+            });
+
             const isOwnProfile = {{ Auth::user()->id === $user->id ? 'true' : 'false' }};
             const $tabs = $('[role="tab"]');
             const $tabPanels = $('[role="tabpanel"]');
@@ -623,7 +707,7 @@
             });
 
             $('#btn-edit-post').on('click', function() {
-                
+
                 const value = editor.getData();
 
                 const body = value
@@ -636,13 +720,24 @@
 
                 var id = $('#post-id').val();
 
+                let formData = new FormData();
+                formData.append('body', body);
+                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+                filesArray.forEach(function(file, index) {
+                    formData.append('arrayImage[]', file);
+                });
+
+                images.forEach(function(image, index) {
+                    formData.append('arrayPath[]', image);
+                })
+
                 $.ajax({
                     url: '/post/update/' + id,
                     method: 'POST',
-                    data: {
-                        body: body,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     dataType: 'json',
                     success: function(response) {
                         swal("Good job!", response.message, response.status);

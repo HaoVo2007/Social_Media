@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\PostAttechment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -11,7 +13,7 @@ class PostController extends Controller
 
         $currentUser = $request->user();
     
-        $posts = Post::with('user')->latest()->get();
+        $posts = Post::with('user')->with('attechments')->latest()->get();
     
         $postsWithOwnerCheck = $posts->map(function ($post) use ($currentUser) {
             $post->check_user = $currentUser && $post->user_id == $currentUser->id;
@@ -27,11 +29,30 @@ class PostController extends Controller
     public function store(Request $request) {
         
         $body = $request->body;
-        
-        Post::create([
+
+        $post = Post::create([
             'body' => $body,
             'user_id' => $request->user()->id,
         ]);
+
+        if ($request->hasFile('arrayImage')) {
+
+            foreach($request->file('arrayImage') as $file) {
+
+                $fileName = time() . '_' . $file->getClientOriginalName();
+
+                $path = $file->storeAs('uploads/posts', $fileName, 'public');
+
+                PostAttechment::create([
+                    'post_id' => $post->id,
+                    'name' => $fileName,
+                    'path' => $path,
+                    'mime' => $file->getClientMimeType(),
+                    'created_by' => $request->user()->id,
+                ]);
+
+            }
+        };
 
         return response()->json([
             'message' => 'Post added successfully !',
@@ -40,7 +61,7 @@ class PostController extends Controller
     }
 
     public function edit(Request $request, Post $post) {
-
+        
         if ($post->user->id != $request->user()->id) {
             return response()->json([
                 'status' => 'error',
@@ -48,7 +69,7 @@ class PostController extends Controller
             ], 403);
         }
 
-        $data = $post->load('user');
+        $data = $post->load('user', 'attechments');
  
         return response()->json([
             'data' => $data
@@ -69,6 +90,40 @@ class PostController extends Controller
             'body' => $request->body,
         ]);
 
+        $existPath = $request->input('arrayPath', []);
+
+        $existPath = array_map(function($path) {
+            return str_replace('/storage/', '', $path);
+        }, $existPath);
+
+        $attachmentsToDelete = $post->attechments->whereNotIn('path', $existPath);
+        
+        foreach ($attachmentsToDelete as $attachment) {
+
+            Storage::delete($attachment->path);
+        
+            $attachment->delete();
+        }
+        
+        if($request->hasFile('arrayImage')) {
+            
+            foreach ($request->file('arrayImage') as $file) {
+
+                $fileName = time() . '_' . $file->getClientOriginalName();
+
+                $path = $file->storeAs('uploads/posts', $fileName, 'public');
+
+                PostAttechment::create([
+                    'post_id' => $post->id,
+                    'name' => $fileName,
+                    'path' => $path,
+                    'mime' => $file->getClientMimeType(),
+                    'created_by' => $request->user()->id,
+                ]);
+            }
+        }
+
+
         return response()->json([
             'status' => 'success',
             'message' => 'Post updated successfully.'
@@ -83,6 +138,12 @@ class PostController extends Controller
                 'status' => 'error',
                 'message' => 'You do not have permission to edit this profile.'
             ], 403);
+        }
+
+        foreach ($post->attechments as $file) {
+            if ($file->path) {
+                Storage::disk('public')->delete($file->path);
+            }
         }
 
         $post->delete();

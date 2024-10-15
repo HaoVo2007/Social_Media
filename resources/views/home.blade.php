@@ -14,7 +14,7 @@
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <!-- Styles -->
     <style>
-        h1.ck-content  {
+        h1.ck-content {
             font-size: 28px;
             color: #333;
             font-weight: bold;
@@ -28,7 +28,7 @@
             margin-bottom: 12px;
         }
 
-        h3.ck-content  {
+        h3.ck-content {
             font-size: 20px;
             color: #555;
             font-weight: bold;
@@ -89,7 +89,7 @@
             padding-left: 20px;
         }
 
-        .ck-content li{
+        .ck-content li {
             margin-bottom: 5px;
         }
 
@@ -100,6 +100,7 @@
     </style>
 </head>
 <x-app-layout>
+
     <body class="font-sans antialiased">
         <div class="grid grid-cols-12 space-x-3 px-5 py-5">
             <div class="col-span-12 md:col-span-3 ">
@@ -214,13 +215,14 @@
                             <textarea id="new-post" name="about" rows="3" placeholder="Create new post" id="focus-post"
                                 class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"></textarea>
                         </div>
+                        <div id="file-preview" class="mt-2 grid-cols-2 grid"></div>
                         <div class="btn-group flex gap-3 justify-end" style="display: none;">
                             <div class="relative">
                                 <button type="submit"
                                     class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Attechment</button>
-                                <input
-                                    class="w-[100px] pointer opacity-0 top-0 left-0 right-0 absolute px-2 py-1 border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                                    type="file" name="" id="btn-attechment">
+                                <input data-type="1"
+                                    class="btn-attechment w-[100px] pointer opacity-0 top-0 left-0 right-0 absolute px-2 py-1 border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                    type="file" multiple name="">
                             </div>
                             <button id="btn-save"
                                 class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
@@ -358,10 +360,18 @@
                         </div>
                         <!-- Modal footer -->
                         <div
-                            class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                            class="flex gap-3 justify-end mr-5">
+                            <div class="relative">
+                                <button type="submit"
+                                    class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Attechment</button>
+                                <input data-type="2"
+                                    class="btn-attechment w-[100px] pointer opacity-0 top-0 left-0 right-0 absolute px-2 py-1 border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                    type="file" multiple name="">
+                            </div>
                             <button type="button" id="btn-edit-post"
-                                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Edit</button>
+                                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Edit</button>
                         </div>
+                        <div id="attachments-container" class="grid-cols-2 grid p-5 gap-5"></div>
                     </div>
                 </div>
             </div>
@@ -373,6 +383,8 @@
 <script>
     let editPost;
     let newPost;
+    let images = [];
+    let filesArray = [];
 
     function loadPosts() {
         $.ajax({
@@ -385,7 +397,6 @@
                 postsContainer.empty();
                 posts.forEach((post, index) => {
                     const isLongContent = post.body.length > 200;
-                    console.log(isLongContent);
                     const avatarPath = post.user.avatar_path ? `/storage/${post.user.avatar_path}` :
                         'storage/uploads/avatars/user-default.webp';
                     const check = post.check_user ? '' : 'hidden';
@@ -435,17 +446,12 @@
                                     </div>
                                     ${isLongContent ? `<button class="toggleBtn text-indigo-600 hover:text-indigo-500 font-semibold" data-index="${index}">Read more ...</button>` : ''}
                                 </div>
-                                <div class="grid grid-cols-2 gap-3 px-5 py-5">
-                                    <img class="object-cover aspect-square" src="https://picsum.photos/1000" alt="">
-                                    <img class="object-cover aspect-square" src="https://picsum.photos/1000" alt="">
-                                    <div class="bg-blue-100 object-cover aspect-square flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-16">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                        </svg>
-                                        <h1 class="text-slate-500 text-sm">Document.doc</h1>
-                                    </div>
+                                <div class="grid ${post.attechments.length == 1 ? 'grid-cols-1 justify-items-center align-items-center' : 'grid-cols-2'} gap-1 px-2 py-2">    
+                                ${post.attechments && post.attechments.length > 0 ? post.attechments.map(attechment => `
+                                    <img class="${post.attechments.length == 1 ? 'w-1/2' : 'w-ful'} object-cover w-full aspect-square" src="/storage/${attechment.path}" alt="">
+                                `).join('') : ''}
                                 </div>
-                                <div class="flex items-center gap-5 px-5 py-5">
+                                <div class="flex items-center gap-2 px-2 py-2">
                                     <button class="py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" />
@@ -508,9 +514,43 @@
             },
 
             error: function(xhr) {
-                console.log(xhr);
+
             }
         });
+    }
+
+    function renderImages(type) {
+        if (type == 1) {
+            var previewContainer = $('#file-preview');
+            previewContainer.html('');
+        } else {
+            var previewContainer = $('#attachments-container');
+            previewContainer.html('');
+        }
+
+        // Hiển thị các ảnh đã chọn với nút xóa
+        images.forEach(function(image, index) {
+            var imageWrapper = $('<div>').addClass('relative');
+            var imgTag = $('<img>').attr('src', image).addClass('w-full rounded-lg border');
+
+            // Tạo nút xóa
+            var deleteButton = $('<button>')
+                .addClass('absolute top-1 right-1 bg-red-600 text-white px-3 py-1 rounded-full text-sm')
+                .text('X')
+                .attr('data-index', index) // Gắn index của ảnh để dễ xóa
+                .on('click', function() {
+                    deleteImage($(this).attr('data-index'), type);
+                });
+
+            imageWrapper.append(imgTag).append(deleteButton);
+            previewContainer.append(imageWrapper);
+        });
+    }
+
+    function deleteImage(index, type) {
+        images.splice(index, 1); // Xóa ảnh khỏi mảng URL
+        filesArray.splice(index, 1); // Xóa file khỏi mảng file
+        renderImages(type); // Cập nhật lại danh sách ảnh hiển thị
     }
 
     function showEditModal(id) {
@@ -531,6 +571,19 @@
                 $('#edit-post').val(response.data.body);
                 $('#post-id').val(response.data.id);
 
+                const attachmentsContainer = $('#attachments-container');
+                attachmentsContainer.empty();
+
+                if (response.data.attechments && response.data.attechments.length > 0) {
+                    images = [];
+                    filesArray = [];
+                    response.data.attechments.forEach(attechment => {
+                        images.push(`/storage/${attechment.path}`);
+                    })
+                }
+
+                renderImages(2);
+
                 if (editPost) {
                     editPost.destroy()
                         .then(() => {
@@ -540,11 +593,11 @@
                                     editPost = newEditor;
                                 })
                                 .catch(error => {
-                                    console.error(error);
+
                                 });
                         })
                         .catch(error => {
-                            console.error('Error while destroying CKEditor:', error);
+
                         });
                 } else {
                     ClassicEditor
@@ -553,7 +606,7 @@
                             editPost = newEditor;
                         })
                         .catch(error => {
-                            console.error(error);
+
                         });
                 }
 
@@ -592,6 +645,41 @@
             $('#modal-edit').hide();
         })
 
+        $('.btn-attechment').on('change', function(event) {
+            var files = event.target.files;
+            var type = $(this).data('type');
+
+            if (type == 1) {
+                var previewContainer = $('#file-preview');
+            } else {
+                var previewContainer = $('#attachments-container');
+            }
+
+            // Lặp qua từng file đã chọn
+            Array.from(files).forEach(file => {
+                // Kiểm tra nếu file là hình ảnh
+                if (file.type.startsWith('image/')) {
+                    var reader = new FileReader();
+
+                    // Khi file được đọc xong
+                    reader.onload = function(e) {
+                        images.push(e.target.result); // Thêm URL ảnh vào mảng
+                        filesArray.push(file); // Thêm file thực tế vào mảng
+
+                        if (type == 1) {
+                            renderImages(1);
+                        } else {
+                            renderImages(2);
+                        }
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+        });
+
+
         ClassicEditor
             .create(document.querySelector('#new-post'))
             .then(newEditor => {
@@ -615,9 +703,10 @@
                 });
             })
             .catch(error => {
-                console.error(error);
+
             });
 
+            
         $('#btn-save').on('click', function() {
 
             const value = newPost.getData();
@@ -630,18 +719,29 @@
                 .replace(/<li>/g, '<li class="ck-content">')
                 .replace(/<ol>/g, '<ol class="ck-content">');
 
+            let formData = new FormData();
+            formData.append('body', body);
+            formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+            filesArray.forEach(function(file, index) {
+                formData.append('arrayImage[]', file);
+            });
+
             $.ajax({
                 url: '/post/store',
                 method: 'POST',
-                data: {
-                    body: body,
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
+                data: formData,
+                processData: false,
+                contentType: false,
                 dataType: 'json',
                 success: function(response) {
                     swal("Good job!", response.message, response.status);
                     $('#new-post').val('');
                     newPost.setData('');
+                    var previewContainer = $('#file-preview');
+                    previewContainer.html('');
+                    images = [];
+                    filesArray = [];
                     loadPosts();
                 },
                 error: function(xhr, status, error) {
@@ -664,19 +764,32 @@
 
             var id = $('#post-id').val();
 
+            let formData = new FormData();
+            formData.append('body', body);
+            formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+            filesArray.forEach(function(file, index) {
+                formData.append('arrayImage[]', file);
+            }); 
+
+            images.forEach(function(image, index) {
+                formData.append('arrayPath[]', image);
+            })
+
             $.ajax({
                 url: '/post/update/' + id,
                 method: 'POST',
-                data: {
-                    body: body,
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
+                data: formData,
+                processData: false,
+                contentType: false,
                 dataType: 'json',
                 success: function(response) {
                     swal("Good job!", response.message, response.status);
                     $('#edit-post').val('');
                     $('#modal-edit').hide();
                     loadPosts();
+                    images = [];
+                    filesArray = [];
                 },
                 error: function(xhr, status, error) {
                     swal("Oops", "Something went wrong!", "error")

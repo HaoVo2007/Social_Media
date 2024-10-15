@@ -29,7 +29,7 @@ class ProfileController extends Controller
 
         $currentUser = $request->user();
 
-        $data = User::with('posts')->findOrFail($user);
+        $data = User::with(['posts.attechments'])->findOrFail($user);
 
         $data->posts->map(function($post) use ($currentUser) {
             $post->check = $post->user_id == $currentUser->id;

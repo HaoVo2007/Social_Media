@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('post_attechments', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Post::class)->constrained();
+            $table->foreignIdFor(Post::class)->constrained()->onDelete('cascade');
             $table->string('name', 255);
             $table->string('path', 255);
             $table->string('mime', 255);
