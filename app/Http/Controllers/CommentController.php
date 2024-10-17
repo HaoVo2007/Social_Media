@@ -30,12 +30,18 @@ class CommentController extends Controller
 
     public function update(Request $request, Comment $comment) {
 
+        $user = $request->user();
+
         $content = $request->content;
 
         $comment->update([
             'comment' => $content,
         ]);
-        
+
+
+        $comment->currentReaction = $comment->commentLikes->where('user_id', $user->id)->isNotEmpty();
+        $comment->total = $comment->commentLikes->where('type', 'like')->count();
+
         $comment->load('user');
         
         return response([

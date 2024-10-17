@@ -896,7 +896,10 @@
                         <div class="flex">
                             <button class="edit-comment text-blue-500 hover:text-blue-700" data-comment-id="${commentId}">Edit</button>
                             <button class="delete-comment text-red-500 hover:text-red-700 ml-3" data-comment-id="${commentId}">Remove</button>
-                            <button class="like-comment text-purple-500 hover:text-purple-700 ml-3" data-comment-id="${commentId}">Like</button>
+                            <button class="like-comment text-purple-500 hover:text-purple-700 ml-3" data-comment-id="${commentId}">
+                                <span class="like-comment-text text-sm text-slate-400">${response.data.currentReaction ? 'Unlike' : 'Like'}</span>
+                                <span class="like-comment-count text-sm text-slate-400">(${response.data.total})</span>
+                            </button>
                         </div>
                     `);
                 },
