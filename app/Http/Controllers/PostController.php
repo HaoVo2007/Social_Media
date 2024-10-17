@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostAttechment;
 use App\Models\PostReaction;
@@ -14,16 +15,20 @@ class PostController extends Controller
 
         $currentUser = $request->user();
     
-        $posts = Post::with(['user', 'reactions', 'attechments'])
+        $posts = Post::with(['user', 'reactions', 'attechments', 'comments.user', 'comments.commentLikes'])
             ->latest()
             ->get();
-
         $postsWithOwnerCheck = $posts->map(function ($post) use ($currentUser) {
 
             $post->check_user = $currentUser && $post->user_id == $currentUser->id;
             $post->currentReaction = $post->reactions->where('user_id', $currentUser->id)->isNotEmpty();
             $post->totalLike = $post->reactions->where('type', 'like')->count();
-            
+
+            $post->comments->map(function($comment) use ($currentUser) {
+                $comment->currentReaction = $comment->commentLikes->where('user_id', $currentUser->id)->isNotEmpty();
+                $comment->total = $comment->commentLikes->where('type', 'like')->count();
+            });
+
             return $post;
         });
     
@@ -195,5 +200,6 @@ class PostController extends Controller
         ]);
 
     }
+
 }
  

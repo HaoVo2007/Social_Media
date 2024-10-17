@@ -29,12 +29,17 @@ class ProfileController extends Controller
 
         $currentUser = $request->user();
 
-        $data = User::with(['posts.attechments', 'posts.reactions'])->findOrFail($user);
+        $data = User::with(['posts.attechments', 'posts.reactions', 'posts.comments.user'])->findOrFail($user);
 
         $data->posts->map(function($post) use ($currentUser) {
             $post->check = $post->user_id == $currentUser->id;
             $post->currentReaction = $post->reactions->where('user_id', $currentUser->id)->isNotEmpty();
             $post->totalLike = $post->reactions->where('type', 'like')->count();
+
+            $post->comments->map(function($comment) use ($currentUser) {
+                $comment->currentReaction = $comment->commentLikes->where('user_id', $currentUser->id)->isNotEmpty();
+                $comment->total = $comment->commentLikes->where('type', 'like')->count();
+            });
         });
         
         return response()->json([
