@@ -29,7 +29,18 @@ class ProfileController extends Controller
 
         $currentUser = $request->user();
 
-        $data = User::with(['posts.attechments', 'posts.reactions', 'posts.comments.user'])->findOrFail($user);
+        $data = User::with([
+            'posts.attechments',
+            'posts.reactions',
+            'posts.comments' => function ($query) {
+               $query->whereNull('parent_id')->with(['user', 'commentLikes', 'children']);
+            },
+            'posts' => function($query) {
+               $query->withCount('comments');
+            },
+            ])->findOrFail($user);    
+                
+            
 
         $data->posts->map(function($post) use ($currentUser) {
             $post->check = $post->user_id == $currentUser->id;
@@ -39,6 +50,8 @@ class ProfileController extends Controller
             $post->comments->map(function($comment) use ($currentUser) {
                 $comment->currentReaction = $comment->commentLikes->where('user_id', $currentUser->id)->isNotEmpty();
                 $comment->total = $comment->commentLikes->where('type', 'like')->count();
+                $comment->check = $comment->user_id == $currentUser->id;    
+                $comment->is_check = $comment->user_id == $currentUser->id ? 1 : 0;
             });
         });
         
@@ -75,14 +88,15 @@ class ProfileController extends Controller
                 $user = $request->user();
 
                 if ($user->cover_path) {
-                    Storage::disk('public')->delete($user->cover_path);
+                    $coverPath = str_replace('/storage/', '', $user->cover_path); 
+                    Storage::disk('public')->delete($coverPath);
                 }
 
                 $cover = $request->file('cover');
     
                 $fileName = time() . '_' . $cover->getClientOriginalName();
     
-                $path = $cover->storeAs('uploads/covers', $fileName, 'public');
+                $path = '/storage/' . $cover->storeAs('uploads/covers', $fileName, 'public');
     
                 $request->user()->update([
                     'cover_path' => $path,
@@ -91,7 +105,7 @@ class ProfileController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Avatar cover change succesfully',
-                    'cover_path' => url('/storage/' . $path),
+                    'cover_path' => $path,
                     'type' => '1',
                 ]);
     
@@ -111,14 +125,15 @@ class ProfileController extends Controller
                 $user = $request->user();
 
                 if ($user->avatar_path) {
-                    Storage::disk('public')->delete($user->avatar_path);
+                    $avatarPath = str_replace('/storage/', '', $user->avatar_path); 
+                    Storage::disk('public')->delete($avatarPath);
                 }
 
                 $avatars = $request->file('avatar');
     
                 $fileName = time() . '_' . $avatars->getClientOriginalName();
     
-                $path = $avatars->storeAs('uploads/avatars', $fileName, 'public');
+                $path = '/storage/' . $avatars->storeAs('uploads/avatars', $fileName, 'public');
     
                 $request->user()->update([
                     'avatar_path' => $path,
@@ -127,7 +142,7 @@ class ProfileController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Avatar avatars change succesfully',
-                    'avatar_path' => url('/storage/' . $path),
+                    'avatar_path' => $path,
                     'type' => '2',
                 ]);
     

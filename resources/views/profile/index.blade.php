@@ -144,7 +144,7 @@
         <div class="px-5 py-5 w-full bg-white shadow-lg transform duration-200 easy-in-out">
             <div class="h-72 overflow-y-hidden relative group">
                 <img id="cover-img-path" class="w-full"
-                    src="/storage/{{ $user->cover_path ? $user->cover_path : '/uploads/covers/image.jpg' }}"
+                    src="{{ $user->cover_path ? $user->cover_path : '/storage/uploads/covers/image.jpg' }}"
                     alt="" />
                 @if (Auth::user()->id === $user->id)
                     <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -169,7 +169,7 @@
             <div class="flex justify-center px-5 -mt-12">
                 <div class="relative">
                     <img id="avatar-img-path" class="h-32 w-32 bg-white p-2 rounded-full"
-                        src="/storage/{{ $user->avatar_path ? $user->avatar_path : '/uploads/avatars/user-default.webp' }}"
+                        src="{{ $user->avatar_path ? $user->avatar_path : '/storage/uploads/avatars/user-default.webp' }}"
                         alt="" />
                     @if (Auth::user()->id === $user->id)
                         <div class="absolute top-0 right-0 w-full h-full">
@@ -335,6 +335,62 @@
         let images = [];
         let filesArray = [];
 
+        function renderComments(comments) {
+            comments.forEach(comment => {
+                console.log(comment.is_check);
+                var newComment = `
+                    <div class="flex w-full full-comment mt-2 mb-2">
+                        <div class="flex-shrink-0">
+                            <img class="w-10 h-10 rounded-full border-2 cursor-pointer hover:border-blue-500" 
+                                src="${comment.user.avatar_path || '/storage/uploads/avatars/user-default.webp'}" 
+                                alt="${comment.user.name}'s avatar">
+                        </div>
+                        <div class="ml-3 flex-grow overflow-hidden">
+                            <h3 class="font-bold text-lg hover:underline cursor-pointer">
+                                <a href="/profile/${comment.user.id}">${comment.user.name}</a>
+                            </h3>
+                            <div class="text-xs text-gray-500">
+                                Posted on ${new Date(comment.created_at).toLocaleString()}
+                            </div>
+                            <div class="comment-container mt-1">
+                                <div class="comment-content">
+                                    <div class="comment-text text-base text-black-500 break-words">
+                                        <p>${comment.comment}</p>    
+                                    </div>
+                                    <div class="flex mt-2 gap-3">
+                                        <button class="${comment.is_check == 1 ? '' : 'hidden'} edit-comment text-blue-500 hover:text-blue-700" data-post-id="${comment.post_id}" data-comment-id="${comment.id}">Edit</button>
+                                        <button class="${comment.is_check == 1 ? '' : 'hidden'} delete-comment text-red-500 hover:text-red-700" data-post-id="${comment.post_id}" data-comment-id="${comment.id}">Remove</button>
+                                        <button class="like-comment text-purple-500 hover:text-purple-700" data-comment-id="${comment.id}">
+                                            <span class="like-comment-text text-sm text-slate-400">${comment.currentReaction == 1 ? 'Unlike' : 'Like'}</span>
+                                            <span class="like-comment-count text-sm text-slate-400">(${comment.total ? comment.total : 0})</span>
+                                        </button>
+                                        <button class="reply-comment text-green-500 hover:text-green-700" data-post-id="${comment.post_id}" data-comment-id="${comment.id}">Reply</button>
+                                    </div>
+                                </div>
+                                <div class="subcomments" id="subcomment-list-${comment.id}"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                if (comment.parent_id != null) {
+                    const parentElement = $(`#subcomment-list-${comment.parent_id}`);
+                    if (parentElement.length) {
+                        parentElement.prepend(newComment);
+                    }
+                } else {
+                    const commentList = $(`#comment-list-${comment.post_id}`);
+                    if (commentList.length) {
+                        commentList.prepend(newComment);
+                    }
+                }
+
+                if (comment.children && comment.children.length > 0) {
+                    renderComments(comment.children);
+                }
+            });
+        }
+
         function uploadCover(type) {
             var id = $('#user-id').val();
             var currentUserId = '{{ Auth::user()->id }}';
@@ -395,14 +451,14 @@
                 dataType: 'json',
                 success: function(response) {
                     const posts = response.data.posts;
-                    const avatarPath = response.data.avatar_path ? `/storage/${response.data.avatar_path}` :
+                    const avatarPath = response.data.avatar_path ? response.data.avatar_path :
                         '/storage/uploads/avatars/user-default.webp';
                     const userId = response.data.id;
                     const name = response.data.name;
                     const postsContainer = $('#postsContainer');
                     postsContainer.empty();
                     posts.forEach((post, index) => {
-                        const isLongContent = post.body.length > 200;
+                        const isLongContent = post.body.length > 400;
                         const check = post.check ? '' : 'hidden';
                         const postHtml = `
                                 <div id="has-post" class="mx-5 rounded shadow mb-4 bg-white">
@@ -446,15 +502,17 @@
                                     </div>
                                     <div class="px-5 py-2">
                                         <div id="content-${index}" style="max-height: ${isLongContent ? '4.5rem' : 'none'}; overflow: hidden;">
-                                            <p class="text-sm text-gray-500 overflow-hidden"  class="post-content">${post.body}</p>    
+                                            <div class="text-sm text-gray-500 overflow-hidden"  class="post-content">
+                                                ${post.body}
+                                            </div>    
                                         </div>
 
                                         ${isLongContent ? `<button class="toggleBtn text-indigo-600 hover:text-indigo-500 font-semibold" data-index="${index}">Read more ...</button>` : ''}
                                     </div>
                                     <div class="grid ${post.attechments.length == 1 ? 'grid-cols-1 justify-items-center align-items-center' : 'grid-cols-2'} post gap-1 px-2 py-2">    
                                     ${post.attechments && post.attechments.length > 0 ? post.attechments.map(attechment => `
-                                                <img class="${post.attechments.length == 1 ? 'w-1/2' : 'w-ful'} post-image object-cover w-full aspect-square" src="/storage/${attechment.path}" alt="">
-                                            `).join('') : ''}
+                                                    <img class="${post.attechments.length == 1 ? 'w-1/2' : 'w-ful'} post-image object-cover w-full aspect-square" src="${attechment.path}" alt="">
+                                                `).join('') : ''}
                                     </div>
                                     <div class="flex items-center gap-5 px-5 py-5">
                                         <button data-post-id = "${post.id}" class="like-${post.id} like-button py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
@@ -464,11 +522,11 @@
                                             <span class="like-text text-sm text-slate-400">${post.currentReaction ? 'Unlike' : 'Like'}</span>
                                             <span class="like-count text-sm text-slate-400">(${post.totalLike})</span>
                                         </button>
-                                        <button data-post-id = "${post.id}" class="comment-button py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
+                                        <button data-post-id = "${post.id}" class="comment-${post.id} comment-button py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
                                             </svg>
-                                            <p class="text-sm text-slate-400">Comment</p>
+                                            <p class="text-comment-count text-sm text-slate-400">Comment (${post.comments_count})</p>
                                         </button>
                                     </div>
                                     <div id="modal-comment-${post.id}" style="display:none" class="p-5">
@@ -481,43 +539,20 @@
                                     </div>
 
                                     <div id="comment-list-${post.id}" class="comment-list w-full space-y-4 mt-5">
-                                        ${post.comments && post.comments.length > 0 ? post.comments.map(comment => `
-                                            <div class="flex w-full full-comment">
-                                                <div class="flex-shrink-0">
-                                                    <img class="w-10 h-10 rounded-full border-2 cursor-pointer hover:border-blue-500" 
-                                                        src="${comment.user.avatar_path || '/storage/uploads/avatars/user-default.webp'}" 
-                                                        alt="${comment.user.name}'s avatar">
-                                                </div>
-                                                <div class="ml-3 flex-grow overflow-hidden">
-                                                    <h3 class="font-bold text-lg hover:underline cursor-pointer">
-                                                        <a href="/profile/${comment.user.id}">${comment.user.name}</a>
-                                                    </h3>
-                                                    <div class="text-xs text-gray-500">
-                                                        Posted on ${new Date(comment.created_at).toLocaleString()}
-                                                    </div>
-                                                    <div class="comment-container mt-1">
-                                                        <div class="comment-content">
-                                                            <div class="comment-text text-base text-black-500 break-words">
-                                                                <p>${comment.comment}</p>    
-                                                            </div>
-                                                            <div class="flex mt-2 space-x-3">
-                                                                <button class="edit-comment text-blue-500 hover:text-blue-700" data-comment-id="${comment.id}">Edit</button>
-                                                                <button class="delete-comment text-red-500 hover:text-red-700" data-comment-id="${comment.id}">Remove</button>
-                                                                <button class="like-comment text-purple-500 hover:text-purple-700" data-comment-id="${comment.id}">
-                                                                    <span class="like-comment-text text-sm text-slate-400">${comment.currentReaction ? 'Unlike' : 'Like'}</span>
-                                                                    <span class="like-comment-count text-sm text-slate-400">(${comment.total})</span>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>    
-                                        `).join('') : ''}
+                                         ${post.comments && post.comments.length > 0 
+                                            ? `<div id="comment-list-${post.id}" class="comment-list w-full space-y-4 mt-5"></div>`
+                                            : ''
+                                        }
                                     </div>
                                 </div>
                                 </div>
                             `;
+
                         postsContainer.append(postHtml);
+;
+                        if (post.comments && post.comments.length > 0) {
+                            renderComments(post.comments); 
+                        }
                     })
 
                     $('.toggleBtn').on('click', function() {
@@ -562,10 +597,6 @@
                             });
                     });
                 },
-
-                error: function(xhr) {
-                    console.log(xhr);
-                }
             });
         }
 
@@ -610,7 +641,7 @@
                 dataType: 'json',
                 success: function(response) {
                     const avatarPath = response.data.user.avatar_path ?
-                        `/storage/${response.data.user.avatar_path}` :
+                        response.data.user.avatar_path :
                         '/storage/uploads/avatars/user-default.webp';
                     var created_at = new Date(response.data.created_at).toLocaleString()
 
@@ -628,7 +659,7 @@
                         images = [];
                         filesArray = [];
                         response.data.attechments.forEach(attechment => {
-                            images.push(`/storage/${attechment.path}`);
+                            images.push(`${attechment.path}`);
                         })
                     }
 
@@ -681,13 +712,23 @@
 
                     }
                 },
-                error: function(xhr, status, error) {
-                    swal("Oops", "Something went wrong!", "error")
-                }
             })
         }
 
         $(document).ready(function() {
+
+            $.ajaxSetup({
+                error: function(xhr, status, error) {
+                    switch (xhr.status) {
+                        case 403:
+                            window.location.href = '/403';
+                            break;
+                        case 401:
+                            window.location.href = '/login';
+                            break;
+                    }
+                }
+            });
 
             loadPosts();
 
@@ -721,9 +762,6 @@
                         likeText.text(response.currentReaction ? 'Unlike' : 'Like');
                         likeCount.text(`(${response.totalLike})`);
                     },
-                    error: function(xhr, status, error) {
-                        console.error('Error adding reaction:', error);
-                    }
                 });
             });
 
@@ -732,140 +770,208 @@
                 $('#modal-comment-' + postId).toggle();
             });
 
+            $(document).on('click', '.reply-comment', function() {
+                var commentId = $(this).data('comment-id');
+                var postId = $(this).data('post-id');
+                var replyFormId = $('#reply-form-' + commentId);
+
+                var isFormVisible = replyFormId.is(':visible');
+
+                $('.reply-form').hide();
+
+                if (!isFormVisible) {
+                    if (replyFormId.length) {
+                        replyFormId.show();
+                    } else {
+                        var replyForm = `
+                        <div id="reply-form-${commentId}" class="reply-form">
+                            <textarea class="edit-comment-textarea w-full p-2 border rounded" rows="3" style="vertical-align: top;" id="comment-${commentId}"></textarea>
+                            <div class="mt-2">
+                                <button class="send-comment bg-purple-700 text-white font-medium py-2 px-4 rounded hover:bg-purple-600" data-post-id="${postId}" data-parent-id="${commentId}">Lưu</button>
+                                <button class="cancel-reply bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 ml-2" data-comment-id="${commentId}">Hủy</button>
+                            </div>
+                        </div>
+                    `;
+                        $('#subcomment-list-' + commentId).append(replyForm);
+                    }
+                }
+            });
+
             $(document).on('click', '.send-comment', function() {
                 var postId = $(this).data('post-id');
-                var comment = $('#comment-' + postId).val();
+                var parentId = $(this).data('parent-id') || null; // Sử dụng parentId nếu là subcomment
+
+                if (parentId) {
+                    var comment = $('#comment-' + parentId).val();
+                } else {
+                    var comment = $('#comment-' + postId).val();
+                }
+
                 $.ajax({
                     url: `/post/comment/${postId}`,
                     type: 'POST',
                     data: {
                         post_id: postId,
                         comment: comment,
+                        parent_id: parentId,
                     },
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
                         var newComment = `
-                                            <div class="flex w-full full-comment">
-                                                <div class="flex-shrink-0">
-                                                    <img class="w-10 h-10 rounded-full border-2 cursor-pointer hover:border-blue-500" 
-                                                        src="${response.data.user.avatar_path || '/storage/uploads/avatars/user-default.webp'}" 
-                                                        alt="${response.data.user.name}'s avatar">
-                                                </div>
-                                                <div class="ml-3 flex-grow overflow-hidden">
-                                                    <h3 class="font-bold text-lg hover:underline cursor-pointer">
-                                                        <a href="/profile/${response.data.user.id}">${response.data.user.name}</a>
-                                                    </h3>
-                                                    <div class="text-xs text-gray-500">
-                                                        Posted on ${new Date(response.data.created_at).toLocaleString()}
-                                                    </div>
-                                                    <div class="comment-container mt-1">
-                                                        <div class="comment-content">
-                                                            <div class="comment-text text-base text-black-500 break-words">
-                                                                <p>${response.data.comment}</p>    
-                                                            </div>
-                                                            <div class="flex mt-2 space-x-3">
-                                                                <button class="edit-comment text-blue-500 hover:text-blue-700" data-comment-id="${response.data.id}">Edit</button>
-                                                                <button class="delete-comment text-red-500 hover:text-red-700" data-comment-id="${response.data.id}">Remove</button>
-                                                                <button class="like-comment text-purple-500 hover:text-purple-700" data-comment-id="${response.data.id}">
-                                                                    <span class="like-comment-text text-sm text-slate-400">Like</span>
-                                                                    <span class="like-comment-count text-sm text-slate-400">(0)</span>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div> 
+                        <div class="flex w-full full-comment mt-2 mb-2">
+                            <div class="flex-shrink-0">
+                                <img class="w-10 h-10 rounded-full border-2 cursor-pointer hover:border-blue-500" 
+                                    src="${response.data.user.avatar_path || '/storage/uploads/avatars/user-default.webp'}" 
+                                    alt="${response.data.user.name}'s avatar">
+                            </div>
+                            <div class="ml-3 flex-grow overflow-hidden">
+                                <h3 class="font-bold text-lg hover:underline cursor-pointer">
+                                    <a href="/profile/${response.data.user.id}">${response.data.user.name}</a>
+                                </h3>
+                                <div class="text-xs text-gray-500">
+                                    Posted on ${new Date(response.data.created_at).toLocaleString()}
+                                </div>
+                                <div class="comment-container mt-1">
+                                    <div class="comment-content">
+                                        <div class="comment-text text-base text-black-500 break-words">
+                                            <p>${response.data.comment}</p>    
+                                        </div>
+                                        <div class="flex mt-2 gap-3">
+                                            <button class="edit-comment text-blue-500 hover:text-blue-700" data-post-id = ${postId} data-comment-id="${response.data.id}">Edit</button>
+                                            <button class="delete-comment text-red-500 hover:text-red-700" data-post-id = ${postId} data-comment-id="${response.data.id}">Remove</button>
+                                            <button class="like-comment text-purple-500 hover:text-purple-700" data-comment-id="${response.data.id}">
+                                                <span class="like-comment-text text-sm text-slate-400">Like</span>
+                                                <span class="like-comment-count text-sm text-slate-400">(0)</span>
+                                            </button>
+                                            <button class="reply-comment text-green-500 hover:text-green-700" data-post-id = ${postId} data-comment-id="${response.data.id}">Reply</button>
+                                        </div>
+                                    </div>
+                                    <div class="subcomments" id="subcomment-list-${response.data.id}"></div> <!-- Vùng chứa subcomments -->
+                                </div>
+                            </div>
+                        </div>
                     `;
-                        $('#comment-list-' + postId).prepend(newComment);
-                        $('#comment-' + postId).val('');
-                    },
-                    error: function(xhr, status, error) {
 
-                    }
+                        // Nếu là subcomment, chèn vào vùng subcomment của comment cha
+                        if (parentId) {
+                            $('#subcomment-list-' + parentId).prepend(newComment);
+                        } else {
+                            // Comment chính, thêm vào danh sách comment
+                            $('#comment-list-' + postId).prepend(newComment);
+                        }
+
+                        $('#comment-' + postId).val('');
+
+                        $('#reply-form-' + parentId).hide();
+
+                        const commentButton = $(`.comment-${postId}`);
+                        const commentText = commentButton.find('.text-comment-count');
+                        commentText.text(`(${response.comments_count})`);
+
+                    },
                 });
             });
 
             $(document).on('click', '.edit-comment', function() {
-                $('.comment-container').each(function() {
+                $('.comment-content').each(function() {
                     var container = $(this);
                     if (container.find('.edit-comment-textarea').length > 0) {
                         var originalText = container.find('.edit-comment-textarea').val();
                         container.find('.comment-content').html(`
-                        <div class="comment-text mt-1 text-base text-black-500">
-                            <p>${originalText}</p>
-                        </div>
-                        <div class="flex">
-                            <button class="edit-comment text-blue-500 hover:text-blue-700" data-comment-id="${container.find('.edit-comment-textarea').data('comment-id')}">Edit</button>
-                            <button class="delete-comment text-red-500 hover:text-red-700 ml-3" data-comment-id="${container.find('.edit-comment-textarea').data('comment-id')}">Remove</button>
-                            <button class="like-comment text-purple-500 hover:text-purple-700 ml-3" data-comment-id="${container.find('.edit-comment-textarea').data('comment-id')}">Like</button>
-                        </div>
-                    `);
+                            <div class="comment-text mt-1 text-base text-black-500">
+                                <p>${originalText}</p>
+                            </div>
+                            <div class="flex">
+                                <button class="edit-comment text-blue-500 hover:text-blue-700" data-comment-id="c">Edit</button>
+                                <button class="delete-comment text-red-500 hover:text-red-700 ml-3" data-comment-id="${container.find('.edit-comment-textarea').data('comment-id')}">Remove</button>
+                                <button class="like-comment text-purple-500 hover:text-purple-700 ml-3" data-comment-id="${container.find('.edit-comment-textarea').data('comment-id')}">Like</button>
+                            </div>
+                        `);
                     }
                 });
 
-                var commentContainer = $(this).closest('.comment-container');
+                var commentContainer = $(this).closest('.comment-content');
+                var commentTextReaction = commentContainer.find('.like-comment-text').text();
+                var commentTextCount = commentContainer.find('.like-comment-count').text();
+
                 var commentId = $(this).data('comment-id');
                 var commentText = commentContainer.find('.comment-text').text();
-                commentContainer.find('.comment-content').html(`
+                var postId = $(this).data('post-id')
+
+                commentContainer.html(`
+                <input type="hidden" class="text-like-name" name="" value="${commentTextReaction}">
+                <input type="hidden" class="text-like-count" name="" value="${commentTextCount}">
                 <textarea class="edit-comment-textarea w-full p-2 border rounded" rows="3" style="vertical-align: top;" id="comment-edit-${commentId}">${commentText.trim()}</textarea>
                 <div class="mt-2">
                     <button class="save-edit bg-purple-700 text-white font-medium py-2 px-4 rounded hover:bg-purple-600" data-comment-id="${commentId}">Lưu</button>
-                    <button class="cancel-edit bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 ml-2" data-comment-id="${commentId}">Hủy</button>
+                    <button class="cancel-edit bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 ml-2"data-post-id="${postId}" data-comment-id="${commentId}">Hủy</button>
                 </div>
             `);
             });
 
             $(document).on('click', '.cancel-edit', function() {
                 var commentId = $(this).data('comment-id');
-                var commentContainer = $(this).closest('.comment-container');
+                var commentContainer = $(this).closest('.comment-content');
                 var commentText = commentContainer.find('.edit-comment-textarea').val();
-                commentContainer.find('.comment-content').html(`
+                var commentTextReaction = commentContainer.find('.text-like-name').val();
+                var commentTextCount = commentContainer.find('.text-like-count').val();
+
+                commentContainer.html(`
                 <div class="comment-text mt-1 text-base text-black-500">${commentText}</div>
-                <div class="flex">
-                    <button class="edit-comment text-blue-500 hover:text-blue-700" data-comment-id="${commentId}">Edit</button>
-                    <button class="delete-comment text-red-500 hover:text-red-700 ml-3" data-comment-id="${commentId}">Delete</button>
-                    <button class="like-comment text-purple-500 hover:text-purple-700 ml-3" data-comment-id="${commentId}">Like</button>
+                <div class="flex gap-3">
+                    <button class="edit-comment text-blue-500 hover:text-blue-700" data-post-id = "${commentContainer.find('.cancel-edit').data('post-id')}" data-comment-id="${commentId}">Edit</button>
+                    <button class="delete-comment text-red-500 hover:text-red-700 data-post-id = "${commentContainer.find('.cancel-edit').data('post-id')}" " data-comment-id="${commentId}">Delete</button>
+                    <button class="like-comment text-purple-500 hover:text-purple-700 data-post-id = "${commentContainer.find('.cancel-edit').data('post-id')}" " data-comment-id="${commentId}">
+                        <span class="like-comment-text text-sm text-slate-400">${commentTextReaction}</span>
+                        <span class="like-comment-count text-sm text-slate-400">${commentTextCount}</span>
+                    </button>
+                    <button class="reply-comment text-green-500 hover:text-green-700" data-post-id = "${commentContainer.find('.cancel-edit').data('post-id')}" data-comment-id="${commentContainer.find('.cancel-edit').data('comment-id')}">Reply</button>
                 </div>
             `);
+            });
+
+            $(document).on('click', '.cancel-reply', function() {
+                var commentId = $(this).data('comment-id');
+                $('#reply-form-' + commentId).hide();
             });
 
             $(document).on('click', '.save-edit', function() {
                 var commentId = $(this).data('comment-id');
                 var comment = $('#comment-edit-' + commentId).val();
-                var commentContainer = $(this).closest('.comment-container');
+                var commentContainer = $(this).closest('.comment-content');
+                var postId = commentContainer.find('.cancel-edit').data('post-id');
+
                 $.ajax({
                     url: `/post/comment/update/${commentId}`,
                     type: 'POST',
                     data: {
-                        comment_id: commentId,
                         content: comment,
                     },
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
-                        commentContainer.find('.comment-content').html(`
+                        commentContainer.html(`
                         <div class="comment-text mt-1 text-base text-black-500">${response.data.comment}</div>
-                        <div class="flex">
-                            <button class="edit-comment text-blue-500 hover:text-blue-700" data-comment-id="${commentId}">Edit</button>
-                            <button class="delete-comment text-red-500 hover:text-red-700 ml-3" data-comment-id="${commentId}">Remove</button>
-                            <button class="like-comment text-purple-500 hover:text-purple-700 ml-3" data-comment-id="${commentId}">
+                        <div class="flex gap-3">
+                            <button class="edit-comment text-blue-500 hover:text-blue-700" data-post-id = ${postId} data-comment-id="${commentId}">Edit</button>
+                            <button class="delete-comment text-red-500 hover:text-red-700" data-post-id = ${postId} data-comment-id="${commentId}">Remove</button>
+                            <button class="like-comment text-purple-500 hover:text-purple-700" data-post-id = ${postId} data-comment-id="${commentId}">
                                 <span class="like-comment-text text-sm text-slate-400">${response.data.currentReaction ? 'Unlike' : 'Like'}</span>
-                                <span class="like-comment-count text-sm text-slate-400">(${response.data.total})</span> 
+                                <span class="like-comment-count text-sm text-slate-400">(${response.data.total})</span>
                             </button>
+                            <button class="reply-comment text-green-500 hover:text-green-700" data-post-id = ${postId} data-comment-id="${response.data.id}">Reply</button>
                         </div>
                     `);
                     },
-                    error: function(xhr, status, error) {
-
-                    }
                 });
             });
 
             $(document).on('click', '.delete-comment', function() {
                 var commentId = $(this).data('comment-id');
+                var postId = $(this).data('post-id');
                 var commentContainer = $(this).closest('.full-comment');
                 swal({
                         title: "Are you sure?",
@@ -878,6 +984,9 @@
                         if (willDelete) {
                             $.ajax({
                                 url: `/post/comment/destroy/${commentId}`,
+                                data: {
+                                    post_id: postId,
+                                },
                                 type: 'POST',
                                 headers: {
                                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -886,10 +995,11 @@
                                     if (response.status === 'success') {
                                         commentContainer.remove();
                                     }
+                                    const commentButton = $(`.comment-${postId}`);
+                                    const commentText = commentButton.find(
+                                        '.text-comment-count');
+                                    commentText.text(`(${response.comments_count})`);
                                 },
-                                error: function(xhr, status, error) {
-
-                                }
                             });
                         } else {
                             swal("Your imaginary file is safe!");
@@ -914,16 +1024,16 @@
                     },
                     success: function(response) {
                         const likeText = likeButton.find('.like-comment-text');
+
                         const likeCount = likeButton.find('.like-comment-count');
+
                         likeText.text(response.currentReaction ? 'Unlike' : 'Like');
                         likeCount.text(`(${response.total})`);
 
                     },
-                    error: function(xhr, status, error) {
-
-                    }
                 });
             });
+
             var currentImageIndex = 0;
             var imagesPost = [];
 
@@ -1073,9 +1183,6 @@
                         $('#modal-edit').hide();
                         loadPosts();
                     },
-                    error: function(xhr, status, error) {
-                        swal("Oops", "Something went wrong!", "error")
-                    }
                 });
             });
 

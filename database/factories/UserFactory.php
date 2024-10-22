@@ -27,6 +27,8 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'cover_path' => 'https://picsum.photos/id/' . $this->faker->numberBetween(1, 100) . '/800/600',
+            'avatar_path' => 'https://robohash.org/' . $this->faker->numberBetween(1, 100),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];

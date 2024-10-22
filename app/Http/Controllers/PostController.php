@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PostResource;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostAttechment;
@@ -13,31 +14,22 @@ class PostController extends Controller
 {
     public function index(Request $request) {
 
-        $currentUser = $request->user();
+    $posts = Post::with([
+        'user',
+        'reactions',
+        'attechments',
+        'comments' => function ($query) {
+            $query->whereNull('parent_id')
+                  ->with(['user', 'commentLikes', 'children']);
+        }
+    ])
+    ->withCount('comments')
+    ->latest()
+    ->paginate(10);
+
+    return PostResource::collection($posts);
     
-        $posts = Post::with(['user', 'reactions', 'attechments', 'comments.user', 'comments.commentLikes'])
-            ->latest()
-            ->get();
-        $postsWithOwnerCheck = $posts->map(function ($post) use ($currentUser) {
-
-            $post->check_user = $currentUser && $post->user_id == $currentUser->id;
-            $post->currentReaction = $post->reactions->where('user_id', $currentUser->id)->isNotEmpty();
-            $post->totalLike = $post->reactions->where('type', 'like')->count();
-
-            $post->comments->map(function($comment) use ($currentUser) {
-                $comment->currentReaction = $comment->commentLikes->where('user_id', $currentUser->id)->isNotEmpty();
-                $comment->total = $comment->commentLikes->where('type', 'like')->count();
-            });
-
-            return $post;
-        });
-    
-        return response()->json([
-            'data' => $postsWithOwnerCheck,
-        ]);
-        
-    }
-
+}
     public function store(Request $request) {
 
         $body = $request->body;
@@ -53,7 +45,7 @@ class PostController extends Controller
 
                 $fileName = time() . '_' . $file->getClientOriginalName();
 
-                $path = $file->storeAs('uploads/posts', $fileName, 'public');
+                $path = '/storage/' . $file->storeAs('uploads/posts', $fileName, 'public');
 
                 PostAttechment::create([
                     'post_id' => $post->id,
@@ -104,16 +96,14 @@ class PostController extends Controller
 
         $existPath = $request->input('arrayPath', []);
 
-        $existPath = array_map(function($path) {
-            return str_replace('/storage/', '', $path);
-        }, $existPath);
-
         $attachmentsToDelete = $post->attechments->whereNotIn('path', $existPath);
-        
+
         foreach ($attachmentsToDelete as $attachment) {
 
-            Storage::delete($attachment->path);
-        
+            $postImage = str_replace('/storage/', '', $attachment->path);
+
+            Storage::disk('public')->delete($postImage);
+                
             $attachment->delete();
         }
         
@@ -123,7 +113,7 @@ class PostController extends Controller
 
                 $fileName = time() . '_' . $file->getClientOriginalName();
 
-                $path = $file->storeAs('uploads/posts', $fileName, 'public');
+                $path = '/storage/' . $file->storeAs('uploads/posts', $fileName, 'public');
 
                 PostAttechment::create([
                     'post_id' => $post->id,
@@ -154,7 +144,11 @@ class PostController extends Controller
 
         foreach ($post->attechments as $file) {
             if ($file->path) {
-                Storage::disk('public')->delete($file->path);
+
+                $postImage = str_replace('/storage/', '', $file->path);
+
+                Storage::disk('public')->delete($postImage);
+
             }
         }
 

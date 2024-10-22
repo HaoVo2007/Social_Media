@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name', 255);
             $table->string('path', 255);
             $table->string('mime', 255);
-            $table->foreignId('created_by')->nullable()->constrained('users');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

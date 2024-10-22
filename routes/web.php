@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('dashboard')->middleware(['auth', 'verified']);
 
+Route::get('/403', function() {
+    return view('403');
+})->middleware(['auth', 'verified']);
+
 Route::middleware('auth')->group(function () {
     //PROFILE
     Route::get('/profile/{user}', [ProfileController::class, 'index'])->name('profile.index');
@@ -24,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/post/destroy/{post}', [PostController::class, 'destroy'])->name('post.destroy');
     Route::post('/post/reaction/{post}', [PostController::class, 'reaction'])->name('post.reaction');
     //COMMENT   
+    Route::get('/post/comment/', [CommentController::class, 'index'])->name('post.index');
     Route::post('/post/comment/{post}', [CommentController::class, 'comment'])->name('post.comment');
     Route::post('/post/comment/update/{comment}', [CommentController::class, 'update'])->name('post.comment.update');
     Route::post('/post/comment/destroy/{comment}', [CommentController::class, 'destroy'])->name('post.comment.destroy');
