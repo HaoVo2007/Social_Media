@@ -8,8 +8,11 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\CommentLike;
+use App\Models\Group;
+use App\Models\GroupUser;
 use App\Models\PostAttechment;
 use App\Models\PostReaction;
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -29,5 +32,9 @@ class DatabaseSeeder extends Seeder
         PostAttechment::factory(100)->create();
 
         PostReaction::factory(300)->create();
+
+        Group::factory(50)->create();
+
+        GroupUser::factory(200)->create();
     }
 }

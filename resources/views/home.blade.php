@@ -135,100 +135,19 @@
                         <h2 class="text-2xl font-bold text-center">My Group</h2>
                     </div>
 
-                    <div class="px-5 py-1 mb-4">
+                    <div class="px-5 py-1 mb-4 flex items-center justify-center gap-5">
                         <input
                             class="w-full border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500"
                             type="text" placeholder="Find your group" name="" id="search-group">
+                            <button id="btn-new-group"
+                            class="w-36 px-2 py-2 rounded-md bg-indigo-600 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">New Group</button>
+                        
                     </div>
-
-                    {{-- <div id="no-group" class="text-gray-400 flex justify-center px-2">
-                            Your are no joined to any group
-                        </div> --}}
 
                     <div id="has-group" class="max-h-[500px] overflow-y-auto">
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">Conversation</h3>
-                                <p class="text-xs text-gray-500">Get the same random image every time based on a seed,
-                                    by adding /seed/{seed} to the start of the url.</p>
-
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">Conversation</h3>
-                                <p class="text-xs text-gray-500">Get the same random image every time based on a seed,
-                                    by adding /seed/{seed} to the start of the url.</p>
-
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">Conversation</h3>
-                                <p class="text-xs text-gray-500">Get the same random image every time based on a seed,
-                                    by adding /seed/{seed} to the start of the url.</p>
-
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">Conversation</h3>
-                                <p class="text-xs text-gray-500">Get the same random image every time based on a seed,
-                                    by adding /seed/{seed} to the start of the url.</p>
-
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">Conversation</h3>
-                                <p class="text-xs text-gray-500">Get the same random image every time based on a seed,
-                                    by adding /seed/{seed} to the start of the url.</p>
-
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">Conversation</h3>
-                                <p class="text-xs text-gray-500">Get the same random image every time based on a seed,
-                                    by adding /seed/{seed} to the start of the url.</p>
-
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">Conversation</h3>
-                                <p class="text-xs text-gray-500">Get the same random image every time based on a seed,
-                                    by adding /seed/{seed} to the start of the url.</p>
-
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">Conversation</h3>
-                                <p class="text-xs text-gray-500">Get the same random image every time based on a seed,
-                                    by adding /seed/{seed} to the start of the url.</p>
-
-                            </div>
-                        </div>
+                    
                     </div>
                 </div>
-
-
             </div>
             <div class="col-span-12 md:col-span-6 pb-40">
                 <div class="mb-3">
@@ -277,66 +196,7 @@
                             type="text" placeholder="Find your following" name="" id="search-following">
                     </div>
 
-                    {{-- <div id="no-group" class="text-gray-400 flex justify-center px-2">
-                            You don't have friend yet !
-                        </div> --}}
-
                     <div id="has-group" class="max-h-[500px] overflow-y-auto">
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full"
-                                alt="">
-                            <div>
-                                <h3 class="font-bold text-md">Conversation</h3>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full"
-                                alt="">
-                            <div>
-                                <h3 class="font-bold text-md">Conversation</h3>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full"
-                                alt="">
-                            <div>
-                                <h3 class="font-bold text-md">Conversation</h3>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full"
-                                alt="">
-                            <div>
-                                <h3 class="font-bold text-md">Conversation</h3>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full"
-                                alt="">
-                            <div>
-                                <h3 class="font-bold text-md">Conversation</h3>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full"
-                                alt="">
-                            <div>
-                                <h3 class="font-bold text-md">Conversation</h3>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full"
-                                alt="">
-                            <div>
-                                <h3 class="font-bold text-md">Conversation</h3>
-                            </div>
-                        </div>
-
                         <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
                             <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full"
                                 alt="">
@@ -402,6 +262,58 @@
                     </div>
                 </div>
             </div>
+
+            <div id="modal-add-group" style="display: none"
+                class="flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                <div class="relative p-4 w-full max-w-2xl max-h-full">
+                    <!-- Modal content -->
+                    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                        <!-- Modal header -->
+                        <div
+                            class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                Add new group
+                            </h3>
+                            <button id="close-modal-group" type="button"
+                                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 14 14">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                </svg>
+                                <span class="sr-only">Close modal</span>
+                            </button>
+                        </div>
+                        <!-- Modal body -->
+                        <div class="p-4 md:p-5 space-y-4">
+                            <div class="p-4 md:p-5 space-y-4">
+
+                                <div class="mb-4">
+                                    <label for="name-group" class="block text-gray-700 text-sm font-bold mb-2">Your group name</label>
+                                    <input type="text" id="name-group" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Group name">
+                                </div>
+
+                                <div class="mb-4 flex items-center gap-2">
+                                    <input type="checkbox" name="" id="approve" class="block rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                    <label for="approve" class="block text-gray-700 text-sm font-bold">Auto approve</label>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="about-group" class="block text-gray-700 text-sm font-bold mb-2">Your about group</label>
+                                    <textarea id="about-group" rows="3" placeholder="About group"
+                                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"></textarea>
+                                </div>  
+
+                            </div>
+                        </div>
+                        <!-- Modal footer -->
+                        <div class="flex gap-3 justify-end mr-5 pb-2">
+                            <button type="button" id="btn-save-group"
+                                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="image-modal"
@@ -442,7 +354,8 @@
     let images = [];
     let filesArray = [];
     let page = 1;
-    let isLoading;
+    let isLoading;  
+    let debounceTimer;
 
     function renderComments(comments, postId) {
         comments.forEach(comment => {
@@ -599,12 +512,12 @@
                                                 class="send-comment bg-purple-700 text-white font-medium py-2 px-4 rounded hover:bg-purple-600">Comment
                                         </button>
                                     </div>
-                                    
+                                    <div id="comment-list-${post.id}" class="comment-list w-full space-y-4 mt-5">
                                     ${ post.comments && post.comments.length > 0 
                                         ? `<div id="comment-list-${post.id}" class="comment-list w-full space-y-4 mt-5"></div>`
                                         : ''
                                     }
-
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -743,6 +656,44 @@
         })
     }
 
+    function loadGroup(page, search) {
+
+        isLoading = false
+
+        $('#loading').show();
+
+        $.ajax({
+            url: '/group?page=' + page,
+            method: 'GET',
+            data: {
+                search: search,
+            },
+            dataType: 'json',
+            success: function(response) {
+                let groups; 
+                groups = response.data.data;    
+                groupContainer = $('#has-group');
+                groups.forEach(function(group, index) {
+                    const renderGroup = `
+                    <a href="/group/${group.id}">
+                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
+                            <img src="${group.thumnail_path ? group.thumnail_path : '/storage/uploads/groups/default-group.jpg'}" class="w-[48px] h-[48px] rounded-full" alt="">
+                            <div>
+                                <h3 class="font-bold text-lg">${group.name}</h3>
+                                <p class="text-xs text-gray-500">${group.about ? group.about : ''}</p>
+                            </div>
+                        </div>
+                    </a>
+                    `;
+                    groupContainer.append(renderGroup); 
+                });
+            }
+        })
+
+        isLoading = true;
+
+    }
+
     $(document).ready(function() {
 
         $.ajaxSetup({
@@ -760,9 +711,10 @@
 
         loadPosts(page)
 
+        loadGroup(page, search = null)
+
         $(window).scroll(function() {
             if($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
-                console.log(isLoading);
                 if (isLoading == true) {
                     page++; 
                     loadPosts(page);
@@ -770,9 +722,36 @@
             }
         });
 
+        $('#search-group').on('keyup', function() {
+
+            clearTimeout(debounceTimer);
+
+            debounceTimer = setTimeout(function() {
+
+                var searchValue = $('#search-group').val();
+
+                groupContainer = $('#has-group');
+
+                groupContainer.empty();
+
+                loadGroup(page = 1,searchValue)
+
+            }, 500); 
+        });
+
         $('#close-modal').on('click', function() {
             $('#modal-edit').hide();
         })
+
+        $('#btn-new-group').on('click', function() {
+            $('#modal-add-group').show();
+        })
+
+        $('#close-modal-group').on('click', function() {
+            $('#modal-add-group').hide();
+        })
+
+
 
         $(document).on('click', '.toggleBtn', function() {
             const index = $(this).data('index');
@@ -1295,6 +1274,52 @@
                 },
             });
         });
+
+        $('#btn-save-group').on('click', function() {
+            groupContainer = $('#has-group');
+            name = $('#name-group').val();
+            about = $('#about-group').val();
+            approve = $('#approve').prop('checked');
+            $.ajax({
+                url: '/group',
+                method: 'POST',
+                data: {
+                    name: name,
+                    about: about,
+                    approve: approve,
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                dataType: 'json',
+                success: function(response) {
+                    swal("Good job!", response.message, response.status);
+                    const renderGroup = `
+                        <a href="/group/${response.data.id}">
+                            <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
+                                <img src="${response.data.thumnail_path ? response.data.thumnail_path : '/storage/uploads/groups/default-group.jpg'}" class="w-[48px] h-[48px] rounded-full" alt="">
+                                <div>
+                                    <h3 class="font-bold text-lg">${response.data.name}</h3>
+                                    <p class="text-xs text-gray-500">${response.data.about ? response.data.about : ''}</p>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                    groupContainer.prepend(renderGroup); 
+                    $('#modal-add-group').hide();
+                    $('#name-group').val('');
+                    $('#about-group').val('');
+                    $('#approve').prop('checked', false);
+                },
+                error: function(error) {
+                    if (error.responseJSON.errors.name) {
+                        swal("Oops", error.responseJSON.errors.name[0], "error");
+                    } else {
+                        swal("Oops", error.responseJSON.errors.about[0], "error");
+                    }
+                }
+            });
+        })
 
     });
 </script>

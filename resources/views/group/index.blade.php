@@ -144,9 +144,9 @@
         <div class="px-5 py-5 w-full bg-white shadow-lg transform duration-200 easy-in-out">
             <div class="h-72 overflow-y-hidden relative group">
                 <img id="cover-img-path" class="w-full"
-                    src="{{ $user->cover_path ? $user->cover_path : '/storage/uploads/covers/image.jpg' }}"
+                    src="{{ $group->cover_path ? $group->cover_path : '/storage/uploads/covers/image.jpg' }}"
                     alt="" />
-                @if (Auth::user()->id === $user->id)
+                @if (Auth::user()->id === $group->user_id)
                     <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                             class="relative top-0 right-0 bg-white text-gray-700 py-2 px-4 rounded-lg shadow-lg text-sm">
@@ -165,13 +165,15 @@
                 @endif
 
             </div>
-            <input type="hidden" name="" id="user-id" value="{{ $user->id }}">
+            <input type="hidden" name="" id="user-id" value="{{ $group->user_id }}">
+            <input type="hidden" name="" id="group-id" value="{{ $group->id }}">
+
             <div class="flex justify-center px-5 -mt-12">
                 <div class="relative">
                     <img id="avatar-img-path" class="h-32 w-32 bg-white p-2 rounded-full"
-                        src="{{ $user->avatar_path ? $user->avatar_path : '/storage/uploads/avatars/user-default.webp' }}"
+                        src="{{ $group->thumnail_path ? $group->thumnail_path : '/storage/uploads/avatars/user-default.webp' }}"
                         alt="" />
-                    @if (Auth::user()->id === $user->id)
+                    @if (Auth::user()->id === $group->user_id)
                         <div class="absolute top-0 right-0 w-full h-full">
                             <input type="file" class="w-full h-full opacity-0 cursor-pointer" name="avatar-img"
                                 id="avatar-img">
@@ -180,51 +182,95 @@
                 </div>
             </div>
             <div class="text-center px-14">
-                <h2 class="text-gray-800 text-3xl font-bold">{{ $user->name }}</h2>
+                <h2 class="text-gray-800 text-3xl font-bold">{{ $group->name }}</h2>
                 <a class="text-gray-400 mt-2 hover:text-blue-500" href="https://www.instagram.com/immohitdhiman/"
-                    target="BLANK()">{{ $user->email }}</a>
+                    target="BLANK()">{{ $group->about }}</a>
                 <div class="flex items-center justify-center">
                     <div class="text-center p-4 cursor-pointer">
                         <p><span class="font-semibold">2.5 k </span> Followers</p>
                     </div>
                     <div class="border"></div>
-                    <div class="text-center p-4 cursor-pointer">
-                        <p> <span class="font-semibold">2.0 k </span> Following</p>
+                    @if ($group->getCurrentUser == null && $group->auto_approval == 0)
+                        <div class="text-center p-4 cursor-pointer">
+                            <button type="submit"
+                                id="request-group" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Request join groups</button>
+                        </div>
+                    @elseif ($group->getCurrentUser == null && $group->auto_approval == 1)
+                        <div class="text-center p-4 cursor-pointer">
+                            <button type="submit"
+                                id="join-group" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Join to groups</button>
+                        </div>
+                    @elseif ($group->getCurrentUser->role == 'admin')
+                        <div class="text-center p-4 cursor-pointer">
+                            <button type="submit"
+                                id="invite-group" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Invite Users</button>
+                        </div>
+                        <div id="modal-invite" style="display: none"
+                            class="flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                            <div class="relative p-4 w-full max-w-2xl max-h-full">
+                                <!-- Modal content -->
+                                <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                    <!-- Modal header -->
+                                    <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                            Invite User
+                                        </h3>
+                                        <button id="close-modal-invite" type="button"
+                                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                                            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                    stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                            </svg>
+                                            <span class="sr-only">Close modal</span>
+                                        </button>
+                                    </div>
+                                    <!-- Modal body -->
+                                    <div class="p-4 md:p-5 space-y-4">
+                                            <div class="mb-4">
+                                                <input type="text" id="invite-user" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Enter email or username user">
+                                            </div>
+                                    </div>
+                                    <!-- Modal footer -->
+                                    <div class="flex gap-3 justify-end mr-5 pb-3">
+                                        <button type="button" id="btn-invite-user"
+                                            class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Invite</button>
+                                    </div>
+                                </div>
+                            </div>
                     </div>
-
+                    @elseif ($group->getCurrentUser->role == 'user' && $group->getCurrentUser->status == 'approve')
+                    <div class="text-center p-4 cursor-pointer">
+                        <p><span class="font-semibold">You and {{$group->group_users_count}} </span>others are group members</p>
+                    </div>
+                    @elseif ($group->getCurrentUser->role == 'user' && $group->getCurrentUser->status == 'pending')
+                        <div class="text-center p-4 cursor-pointer">
+                            <button type="submit"
+                                id="join-group" disabled="true" class="opacity-50 cursor-not-allowed rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Your request has been sent.</button>
+                        </div>
+                    @endif
                 </div>
             </div>
             <div class="max-w-4xl mx-auto">
                 <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
                     <ul class="flex flex-wrap -mb-px items-center justify-center" id="myTab"
                         data-tabs-toggle="#myTabContent" role="tablist">
-
-                        @if (Auth::user()->id === $user->id)
-                            <li class="mr-2" role="presentation">
-                                <button
-                                    class="inline-block text-gray-500 hover:text-gray-600 hover:border-gray-300 rounded-t-lg py-4 px-4 text-sm font-medium text-center border-transparent border-b-2 dark:text-gray-400 dark:hover:text-gray-300 active"
-                                    id="about-tab" data-tabs-target="#about" type="button" role="tab"
-                                    aria-controls="about" aria-selected="true">About</button>
-                            </li>
-                        @endif
-
                         <li class="mr-2" role="presentation">
                             <button
-                                class="inline-block text-gray-500 hover:text-gray-600 hover:border-gray-300 rounded-t-lg py-4 px-4 text-sm font-medium text-center border-transparent border-b-2 dark:text-gray-400 dark:hover:text-gray-300 "
+                                class="active inline-block text-gray-500 hover:text-gray-600 hover:border-gray-300 rounded-t-lg py-4 px-4 text-sm font-medium text-center border-transparent border-b-2 dark:text-gray-400 dark:hover:text-gray-300 "
                                 id="post-tab" data-tabs-target="#post" type="button" role="tab"
-                                aria-controls="post" aria-selected="false">Post</button>
+                                aria-controls="post" aria-selected="true">Post</button>
                         </li>
                         <li class="mr-2" role="presentation">
                             <button
                                 class="inline-block text-gray-500 hover:text-gray-600 hover:border-gray-300 rounded-t-lg py-4 px-4 text-sm font-medium text-center border-transparent border-b-2 dark:text-gray-400 dark:hover:text-gray-300"
                                 id="followes-tab" data-tabs-target="#followes" type="button" role="tab"
-                                aria-controls="followes" aria-selected="false">Followers</button>
+                                aria-controls="followes" aria-selected="false">Users</button>
                         </li>
                         <li role="presentation">
                             <button
                                 class="inline-block text-gray-500 hover:text-gray-600 hover:border-gray-300 rounded-t-lg py-4 px-4 text-sm font-medium text-center border-transparent border-b-2 dark:text-gray-400 dark:hover:text-gray-300"
                                 id="followings-tab" data-tabs-target="#followings" type="button" role="tab"
-                                aria-controls="followings" aria-selected="false">Followings</button>
+                                aria-controls="followings" aria-selected="false">Request</button>
                         </li>
 
                         <li role="presentation">
@@ -236,66 +282,28 @@
                     </ul>
                 </div>
                 <div id="myTabContent">
-                    @if (Auth::user()->id === $user->id)
-                        <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800" id="about" role="tabpanel"
-                            aria-labelledby="about-tab">
-                            <div class="py-12">
-                                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                                    <div
-                                        class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg flex justify-center items-center">
-                                        <div class="max-w-xl">
-                                            @include('profile.partials.update-profile-information-form')
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg flex justify-center items-center">
-                                        <div class="max-w-xl">
-                                            @include('profile.partials.update-password-form')
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg flex justify-center items-center">
-                                        <div class="max-w-xl">
-                                            @include('profile.partials.delete-user-form')
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                    <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="post" role="tabpanel"
+                    <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800" id="post" role="tabpanel"
                         aria-labelledby="post-tab">
                         <div id="postsContainer">
 
                         </div>
-
                         <input type="hidden" name="" id="post-id">
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="followes" role="tabpanel"
                         aria-labelledby="followes-tab">
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">This is some placeholder
-                            content
-                            the <strong class="font-medium text-gray-800 dark:text-white">Settings tab's
-                                associated content</strong>. Clicking another tab will toggle the visibility
-                            of this one for the next. The tab JavaScript swaps classes to control the
-                            content visibility and styling.</p>
+                        <div id="userGroup" class="grid grid-cols-2 gap-4">
+                            
+                        </div>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="followings" role="tabpanel"
                         aria-labelledby="followings-tab">
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">This is some placeholder
-                            content
-                            the <strong class="font-medium text-gray-800 dark:text-white">Contacts tab's
-                                associated content</strong>. Clicking another tab will toggle the visibility
-                            of this one for the next. The tab JavaScript swaps classes to control the
-                            content visibility and styling.</p>
+                        <div id="requestGroup" class="grid grid-cols-2 gap-4">
+                            
+                        </div>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="photos" role="tabpanel"
                         aria-labelledby="photos-tab">
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">This is some placeholder
-                            content
-                            the <strong class="font-medium text-gray-800 dark:text-white">dsafdsadsadas</p>
+                        
                     </div>
                 </div>
             </div>
@@ -334,6 +342,125 @@
         let editor;
         let images = [];
         let filesArray = [];
+        let checkLoadRequest = false;
+
+        function loadUsers() {
+
+            var id = $('#group-id').val();
+
+            $.ajax({
+                url: '/group/getdata/' + id,
+                method: 'GET',
+                data: {
+                    type: 1,
+                },
+                dataType: 'json',
+                success: function(response) {
+                    const userContainer = $('#userGroup');
+                    userContainer.empty();
+
+                    if (!response.checkPermission) {
+                        const requestTabButton = $('#followings-tab').hide();
+                        const requestTabContent = $('#followings').hide();
+                    }
+
+                    if (response.status == 'error') {
+                        userContainer.removeClass('grid-cols-2').addClass('grid-cols-1');
+                        const userHtml = `
+                            <div class="flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                        </svg>
+                                        <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                        <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                    </div>
+                                </div>
+                        `;
+                        userContainer.append(userHtml);
+                    } else {
+                        const users = response.data.group_users;
+
+                        users.forEach(function(user, index) {
+                            const userHtml = `
+                                <div class="flex items-center justify-start shadow-md bg-slate-400 p-4 rounded-md">
+                                    <img src="${user.user.avatar_path ? user.user.avatar_path : '/storage/uploads/avatars/user-default.webp'}" alt="User Avatar" class="w-10 h-10 rounded-full mr-2">
+                                    <h3 class="font-bold text-lg hover:underline cursor-pointer">
+                                        <a href="/profile/${user.user.id}">${user.user.name}</a>
+                                    </h3>
+                                </div>
+                            `;
+                            userContainer.append(userHtml);
+                        });
+                    }
+                }
+            });
+        }
+
+        function loadRequest() {
+
+            var id = $('#group-id').val();
+
+            $.ajax({
+                url: '/group/getdata/' + id,
+                method: 'GET',
+                data: {
+                    type: 2,
+                },
+                dataType: 'json',
+                success: function(response) {
+                    const userContainer = $('#requestGroup');
+                    userContainer.empty();
+                    const requestTabButton = $('#followings-tab');
+                    const requestTabContent = $('#followings');
+                    if (response.checkPermission) {
+                        requestTabButton.removeClass('hidden');
+                        requestTabContent.removeClass('hidden');
+                        const users = response.data.group_users;
+                        if (users.length == 0) {
+                            userContainer.removeClass('grid-cols-2').addClass('grid-cols-1');
+                            const noRequestHtml = `
+                                <div class="flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                        </svg>
+                                        <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                        <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                    </div>
+                                </div>
+                            `;
+                            userContainer.append(noRequestHtml);
+                        } else {
+                                users.forEach(function(user, index) {
+                                const userHtml = `
+                                    <div class="flex items-center justify-between shadow-md bg-slate-400 p-4 rounded-md">
+                                        <div class="flex items-center">
+                                            <img src="${user.user.avatar ? user.user.avatar : '/storage/uploads/avatars/user-default.webp'}" alt="User Avatar" class="w-10 h-10 rounded-full mr-2">
+                                            <h3 class="font-bold text-lg hover:underline cursor-pointer">
+                                                <a href="/profile/${user.user.id}">${user.user.name}</a>
+                                            </h3>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button data-accept-token = "${user.token}" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
+                                                Accept
+                                            </button>
+                                            <button data-reject-token = "${user.token}"  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                userContainer.append(userHtml);
+                            });
+                        }
+                    } else {
+                        requestTabButton.addlass('hidden');
+                        requestTabContent.addlass('hidden');
+                    }
+                }
+            });
+        }
 
         function renderComments(comments) {
             comments.forEach(comment => {
@@ -392,10 +519,11 @@
         }
 
         function uploadCover(type) {
-            var id = $('#user-id').val();
+            var userId = $('#user-id').val();
             var currentUserId = '{{ Auth::user()->id }}';
+            var id = $('#group-id').val();
 
-            if (id != currentUserId) {
+            if (userId != currentUserId) {
                 swal("Oops", "You do not have permission to update this profile.", "error");
                 return;
             }
@@ -414,7 +542,7 @@
 
             if (fileInput_1.files.length > 0 || fileInput_2.files.length > 0) {
                 $.ajax({
-                    url: "{{ route('profile.edit.image', ['user' => ':id']) }}".replace(':id', id),
+                    url: "{{ route('group.editAvatar', ['group' => ':id']) }}".replace(':id', id),
                     type: 'POST',
                     data: formData,
                     contentType: false,
@@ -731,6 +859,54 @@
             });
 
             loadPosts();
+            loadUsers();
+
+            $('#followings-tab').on('click', function() {
+                if(!checkLoadRequest) {
+                    loadRequest();
+                    checkLoadRequest = true;
+                }
+            })
+
+            $(document).on('click', '[data-accept-token]', function() {
+                const token = $(this).data('accept-token');
+                const parentDiv = $(this).closest('.flex.items-center.justify-between.shadow-md.bg-slate-400.p-4.rounded-md');
+                $.ajax({
+                    url: `/group/accept_approve/${token}`,
+                    method: 'GET',
+                    success: function(response) {
+                        swal("Good job!", response.message, response.status);
+                        parentDiv.remove();
+                    },
+                    error: function(error) {
+                        swal("Error!", response.message, response.status);
+                    }
+                });
+            });
+
+            $(document).on('click', '[data-reject-token]', function() {
+                const token = $(this).data('reject-token');
+                const parentDiv = $(this).closest('.flex.items-center.justify-between.shadow-md.bg-slate-400.p-4.rounded-md');
+                $.ajax({
+                    url: `/group/reject_approve/${token}`,
+                    method: 'GET',
+                    success: function(response) {
+                        parentDiv.remove();
+                        swal("Good job!", response.message, response.status);
+                    },
+                    error: function(error) {
+                        swal("Error!", response.message, response.status);
+                    }
+                });
+            });
+
+            $('#invite-group').on('click', function() {
+                $('#modal-invite').show();
+            })
+
+            $('#close-modal-invite').on('click', function() {
+                $('#modal-invite').hide();
+            })
 
             $('#close-modal').on('click', function() {
                 $('#modal-edit').hide();
@@ -1099,43 +1275,6 @@
 
             });
 
-            const isOwnProfile = {{ Auth::user()->id === $user->id ? 'true' : 'false' }};
-            const $tabs = $('[role="tab"]');
-            const $tabPanels = $('[role="tabpanel"]');
-
-            if (!isOwnProfile) {
-                const $postTab = $('#post-tab');
-                if ($postTab.length) {
-                    $postTab.addClass('active')
-                        .attr('aria-selected', 'true');
-
-                    const $postPanel = $('#post');
-                    if ($postPanel.length) {
-                        $postPanel.removeClass('hidden')
-                    }
-                }
-            }
-
-            $tabs.on('click', function(e) {
-                const $this = $(this);
-                const target = $this.attr('data-tabs-target');
-                const $panel = $(target);
-
-                if (!$panel.length) return;
-
-                $tabs.removeClass('active')
-                    .attr('aria-selected', 'false');
-
-                $tabPanels.addClass('hidden')
-                    .removeClass('active');
-
-                $this.addClass('active')
-                    .attr('aria-selected', 'true');
-
-                $panel.removeClass('hidden')
-                    .addClass('active');
-            });
-
             $('#cover-img').change(function() {
                 uploadCover(1);
             });
@@ -1185,6 +1324,78 @@
                     },
                 });
             });
+
+            $('#btn-invite-user').on('click', function() {
+
+                var id = $('#group-id').val();
+                var user = $('#invite-user').val();
+
+                $.ajax({
+                    url: '/group/invite/' + id,
+                    method: 'POST',
+                    data: {
+                        user: user,
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status == 'success') {
+                            swal("Good job!", response.message, response.status);
+                        } else {
+                            swal("Error", response.message, response.status);
+                        }
+                    }, 
+                })
+            })
+
+            $('#join-group').on('click', function() {
+
+                var id = $('#group-id').val();
+
+                $.ajax({
+                    url: '/group/auto_approve/' + id,
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status == 'success') {
+                            swal("Good job!", response.message, response.status);
+                            $('#join-group').hide();
+                        } else {
+                            swal("Error", response.message, response.status);
+                        }
+                    }, 
+                })
+            })
+
+            $('#request-group').on('click', function() {
+
+                var id = $('#group-id').val();
+
+                $.ajax({
+                    url: '/group/request_approve/' + id,
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status == 'success') {
+                            swal("Good job!", response.message, response.status);
+                            $('#request-group')
+                                .addClass('opacity-50 cursor-not-allowed') 
+                                .prop('disabled', true)                    
+                                .text('Your request has been sent.'); 
+                        } else {
+                            swal("Error", response.message, response.status);
+                        }
+                    }, 
+                })
+            })
 
         });
     </script>
