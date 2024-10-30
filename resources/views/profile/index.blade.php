@@ -180,16 +180,28 @@
                 </div>
             </div>
             <div class="text-center px-14">
-                <h2 class="text-gray-800 text-3xl font-bold">{{ $user->name }}</h2>
+                <div class="flex items-center justify-center gap-5 mb-2">
+                    <h2 class="text-gray-800 text-3xl font-bold">{{ $user->name }}</h2>
+                    <button id="btn-follow"
+                        class="rounded-lg mt-1 text-sm bg-indigo-600 px-5 py-2 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                        <span id="text-follow" class="">
+                            @if ($check_follow)
+                                Unfollow
+                            @else
+                                Follow
+                            @endif
+                        </span>
+                    </button>
+                </div>
                 <a class="text-gray-400 mt-2 hover:text-blue-500" href="https://www.instagram.com/immohitdhiman/"
                     target="BLANK()">{{ $user->email }}</a>
                 <div class="flex items-center justify-center">
                     <div class="text-center p-4 cursor-pointer">
-                        <p><span class="font-semibold">2.5 k </span> Followers</p>
+                        <p><span class="font-semibold" id="follower-text">{{$follower}}</span> Followers</p>
                     </div>
                     <div class="border"></div>
                     <div class="text-center p-4 cursor-pointer">
-                        <p> <span class="font-semibold">2.0 k </span> Following</p>
+                        <p> <span class="font-semibold" id="following-text">{{$following}}</span> Following</p>
                     </div>
 
                 </div>
@@ -334,6 +346,7 @@
         let editor;
         let images = [];
         let filesArray = [];
+        let editPost;
 
         function renderComments(comments) {
             comments.forEach(comment => {
@@ -665,26 +678,26 @@
 
                     renderImages(2);
 
-                    if (editor) {
-                        editor.destroy()
-                            .then(() => {
-                                ClassicEditor
-                                    .create(document.querySelector('#edit-post'))
-                                    .then(newEditor => {
-                                        editor = newEditor;
-                                    })
-                                    .catch(error => {
-                                        console.error(error);
-                                    });
-                            })
-                            .catch(error => {
-                                console.error('Error while destroying CKEditor:', error);
-                            });
+                        if (editPost) {
+                        editPost.destroy().then(() => {
+                            ClassicEditor
+                                .create(document.querySelector('#edit-post'))
+                                .then(newEditor => {
+                                    editPost = newEditor;
+                                    editPost.setData(response.data.body); // Đưa dữ liệu từ API vào editor
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                });
+                        }).catch(error => {
+                            console.error(error);
+                        });
                     } else {
                         ClassicEditor
                             .create(document.querySelector('#edit-post'))
                             .then(newEditor => {
-                                editor = newEditor;
+                                editPost = newEditor;
+                                editPost.setData(response.data.body); // Đưa dữ liệu từ API vào editor
                             })
                             .catch(error => {
                                 console.error(error);
@@ -739,6 +752,35 @@
             $('#new-post').focus(function() {
                 $('.btn-group').show();
             });
+
+            $('#btn-follow').on('click', function() {
+
+                var id = $('#user-id').val();
+
+                $.ajax({
+                    url: '/profile/follow',
+                    type: 'POST',
+                    data: {
+                        follow_id: id,
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.check == 'follow') {
+                            $('#text-follow').text('Follow');
+                            $('#follower-text').text(response.follower);
+                            $('#following-text').text(response.following);
+                        } else {
+                            $('#text-follow').text('Unfollow');
+                            $('#follower-text').text(response.follower);
+                            $('#following-text').text(response.following);
+                        }
+                    }
+                });
+
+            });
+
 
             $(document).on('click', '.like-button', function() {
                 var postId = $(this).data('post-id');

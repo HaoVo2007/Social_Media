@@ -37,7 +37,7 @@ class InvoiceInGroup extends Notification
     {
         return (new MailMessage)
                     ->line('You have been invited to join to group ' . $this->group->name . "")
-                    ->action('Notification Action', url(route('group.approve', $this->token)))
+                    ->action('Accept', url(route('group.approve', $this->token)))
                     ->line('The link will be valid 24 hour');
     }
 

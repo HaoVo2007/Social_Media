@@ -14,28 +14,31 @@ class PostController extends Controller
 {
     public function index(Request $request) {
 
-    $posts = Post::with([
-        'user',
-        'reactions',
-        'attechments',
-        'comments' => function ($query) {
-            $query->whereNull('parent_id')
-                  ->with(['user', 'commentLikes', 'children']);
-        }
-    ])
-    ->withCount('comments')
-    ->latest()
-    ->paginate(10);
+        $posts = Post::with([
+            'user',
+            'group',
+            'reactions',
+            'attechments',
+            'comments' => function ($query) {
+                $query->whereNull('parent_id')
+                    ->with(['user', 'commentLikes', 'children']);
+            }
+        ])
+        ->withCount('comments')
+        ->latest()
+        ->paginate(10);
 
-    return PostResource::collection($posts);
-    
-}
+        return PostResource::collection($posts);
+        
+    }
+
     public function store(Request $request) {
 
         $body = $request->body;
 
         $post = Post::create([
             'body' => $body,
+            'group_id' => $request->group_id ? $request->group_id : null,
             'user_id' => $request->user()->id,
         ]);
 
@@ -58,15 +61,23 @@ class PostController extends Controller
             }
         };
 
+        $post->load('attechments', 'user');
+
         return response()->json([
+            'data' => $post,
             'message' => 'Post added successfully !',
             'status' => 'success',
         ]);
     }
 
     public function edit(Request $request, Post $post) {
+
+        $isAdmin = $post->group && $post->group->groupUsers()
+                    ->where('user_id', $request->user()->id)
+                    ->where('role', 'admin')
+                    ->exists(); 
         
-        if ($post->user->id != $request->user()->id) {
+        if (!$isAdmin && $post->user->id != $request->user()->id) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'You do not have permission to edit this profile.'
@@ -83,7 +94,12 @@ class PostController extends Controller
 
     public function update(Request $request, Post $post) {
 
-        if ($post->user->id != $request->user()->id) {
+        $isAdmin = $post->group && $post->group->groupUsers()
+                    ->where('user_id', $request->user()->id)
+                    ->where('role', 'admin')
+                    ->exists(); 
+
+        if (!$isAdmin && $post->user->id != $request->user()->id) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'You do not have permission to edit this profile.'
@@ -135,7 +151,12 @@ class PostController extends Controller
 
     public function destroy(Request $request, Post $post) {
 
-        if ($post->user->id != $request->user()->id) {
+        $isAdmin = $post->group && $post->group->groupUsers()
+                    ->where('user_id', $request->user()->id)
+                    ->where('role', 'admin')
+                    ->exists(); 
+
+        if (!$isAdmin && $post->user->id != $request->user()->id) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'You do not have permission to edit this profile.'

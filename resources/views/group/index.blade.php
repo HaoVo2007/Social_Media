@@ -85,8 +85,6 @@
             text-decoration: underline;
         }
     </style>
-
-
     <link rel="stylesheet" href="https://unpkg.com/@themesberg/flowbite@1.2.0/dist/flowbite.min.css" />
     <div class=" bg-gray-200 dark:bg-gray-800">
         <div id="modal-edit" style="display: none"
@@ -182,9 +180,8 @@
                 </div>
             </div>
             <div class="text-center px-14">
-                <h2 class="text-gray-800 text-3xl font-bold">{{ $group->name }}</h2>
-                <a class="text-gray-400 mt-2 hover:text-blue-500" href="https://www.instagram.com/immohitdhiman/"
-                    target="BLANK()">{{ $group->about }}</a>
+                <h2 class="text-gray-800 text-3xl font-bold mb-2">{{ $group->name }}</h2>
+                <a class="text-gray-400 mt-4 hover:text-blue-500" target="BLANK()">{{ $group->about }}</a>
                 <div class="flex items-center justify-center">
                     <div class="text-center p-4 cursor-pointer">
                         <p><span class="font-semibold">2.5 k </span> Followers</p>
@@ -192,18 +189,35 @@
                     <div class="border"></div>
                     @if ($group->getCurrentUser == null && $group->auto_approval == 0)
                         <div class="text-center p-4 cursor-pointer">
-                            <button type="submit"
-                                id="request-group" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Request join groups</button>
+                            <button type="submit" id="request-group"
+                                class="flex items-center justify-center gap-3 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                <div id="loading-request-icon"
+                                    class="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+                                    role="status" style="display: none;">
+                                    <span
+                                        class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+                                </div>
+                                <span id="button-request-text">Request to group</span>
+                            </button>
                         </div>
                     @elseif ($group->getCurrentUser == null && $group->auto_approval == 1)
                         <div class="text-center p-4 cursor-pointer">
-                            <button type="submit"
-                                id="join-group" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Join to groups</button>
+                            <button type="submit" id="join-group"
+                                class="flex items-center justify-center gap-3 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                <div id="loading-join-icon"
+                                    class="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+                                    role="status" style="display: none;">
+                                    <span
+                                        class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+                                </div>
+                                <span id="button-join-text">Join to group</span>
+                            </button>
                         </div>
                     @elseif ($group->getCurrentUser->role == 'admin')
                         <div class="text-center p-4 cursor-pointer">
-                            <button type="submit"
-                                id="invite-group" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Invite Users</button>
+                            <button type="submit" id="invite-group"
+                                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Invite
+                                Users</button>
                         </div>
                         <div id="modal-invite" style="display: none"
                             class="flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
@@ -211,41 +225,57 @@
                                 <!-- Modal content -->
                                 <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                                     <!-- Modal header -->
-                                    <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                                    <div
+                                        class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                             Invite User
                                         </h3>
                                         <button id="close-modal-invite" type="button"
                                             class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                                            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                                    stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2"
+                                                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                                             </svg>
                                             <span class="sr-only">Close modal</span>
                                         </button>
                                     </div>
                                     <!-- Modal body -->
                                     <div class="p-4 md:p-5 space-y-4">
-                                            <div class="mb-4">
-                                                <input type="text" id="invite-user" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Enter email or username user">
-                                            </div>
+                                        <div class="mb-4">
+                                            <input type="text" id="invite-user"
+                                                class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                placeholder="Enter email or username user">
+                                        </div>
                                     </div>
                                     <!-- Modal footer -->
                                     <div class="flex gap-3 justify-end mr-5 pb-3">
-                                        <button type="button" id="btn-invite-user"
-                                            class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Invite</button>
+                                        <button type="submit" id="btn-invite-user"
+                                            class="flex items-center justify-center gap-3 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                            <div id="loading-icon"
+                                                class="inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+                                                role="status" style="display: none;">
+                                                <span
+                                                    class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+                                            </div>
+                                            <span id="button-text">Invite Users</span>
+                                        </button>
+
                                     </div>
                                 </div>
                             </div>
-                    </div>
+                        </div>
                     @elseif ($group->getCurrentUser->role == 'user' && $group->getCurrentUser->status == 'approve')
-                    <div class="text-center p-4 cursor-pointer">
-                        <p><span class="font-semibold">You and {{$group->group_users_count}} </span>others are group members</p>
-                    </div>
+                        <div class="text-center p-4 cursor-pointer">
+                            <p><span class="font-semibold">You and {{ $group->group_users_count }} </span>others are
+                                group members</p>
+                        </div>
                     @elseif ($group->getCurrentUser->role == 'user' && $group->getCurrentUser->status == 'pending')
                         <div class="text-center p-4 cursor-pointer">
-                            <button type="submit"
-                                id="join-group" disabled="true" class="opacity-50 cursor-not-allowed rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Your request has been sent.</button>
+                            <button type="submit" id="join-group" disabled="true"
+                                class="opacity-50 cursor-not-allowed rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Your
+                                request has been sent.</button>
                         </div>
                     @endif
                 </div>
@@ -284,6 +314,30 @@
                 <div id="myTabContent">
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800" id="post" role="tabpanel"
                         aria-labelledby="post-tab">
+                        @if ($group->getCurrentUser != null && $group->getCurrentUser->status != 'pending')
+                            <div class="py-8">
+                                <h2 class="text-2xl font-bold text-center">New Post</h2>
+                            </div>
+                            <div class="px-5 py-1 mb-4">
+                                <div class="mt-2 mb-2">
+                                    <textarea id="new-post" name="about" rows="3" placeholder="Create new post" id="focus-post"
+                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"></textarea>
+                                </div>
+                                <div id="file-preview" class="mt-2 grid-cols-2 grid"></div>
+                                <div class="btn-group flex gap-3 justify-end" style="display: none;">
+                                    <div class="relative">
+                                        <button type="submit"
+                                            class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Attachment</button>
+                                        <input data-type="1"
+                                            class="btn-attachment w-[100px] pointer opacity-0 top-0 left-0 right-0 absolute px-2 py-1 border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                            type="file" multiple name="">
+                                    </div>
+                                    <button id="btn-save"
+                                        class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+                                </div>
+                            </div>
+                        @endif
+
                         <div id="postsContainer">
 
                         </div>
@@ -292,18 +346,20 @@
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="followes" role="tabpanel"
                         aria-labelledby="followes-tab">
                         <div id="userGroup" class="grid grid-cols-2 gap-4">
-                            
+
                         </div>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="followings" role="tabpanel"
                         aria-labelledby="followings-tab">
                         <div id="requestGroup" class="grid grid-cols-2 gap-4">
-                            
+
                         </div>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="photos" role="tabpanel"
                         aria-labelledby="photos-tab">
-                        
+                        <div id="all-photo" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -339,6 +395,8 @@
     <script src="https://unpkg.com/@themesberg/flowbite@1.2.0/dist/flowbite.bundle.js"></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/23.0.0/classic/ckeditor.js"></script>
     <script>
+
+        let editPost;
         let editor;
         let images = [];
         let filesArray = [];
@@ -397,6 +455,47 @@
             });
         }
 
+        function loadPhoto() {
+
+            var id = $('#group-id').val();
+
+            $.ajax({
+                url: '/group/attechment/' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    const userContainer = $('#all-photo');
+                    userContainer.empty();
+                    if (response.data.length == 0) {
+                        userContainer.removeClass('grid-cols-3').addClass('grid-cols-1');
+                        const userHtml = `
+                            <div class="flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                        </svg>
+                                        <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                        <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                    </div>
+                                </div>
+                        `;
+                        userContainer.append(userHtml);
+                    } else {
+                        const users = response.data;
+
+                        users.forEach(function(user, index) {
+                            const userHtml = `
+                                <div>
+                                    <img class="h-auto max-w-full rounded-lg" src="${user}" alt="">
+                                </div>
+                            `;
+                            userContainer.append(userHtml);
+                        });
+                    }
+                }
+            });
+        }
+
         function loadRequest() {
 
             var id = $('#group-id').val();
@@ -432,7 +531,7 @@
                             `;
                             userContainer.append(noRequestHtml);
                         } else {
-                                users.forEach(function(user, index) {
+                            users.forEach(function(user, index) {
                                 const userHtml = `
                                     <div class="flex items-center justify-between shadow-md bg-slate-400 p-4 rounded-md">
                                         <div class="flex items-center">
@@ -442,10 +541,10 @@
                                             </h3>
                                         </div>
                                         <div class="flex gap-2">
-                                            <button data-accept-token = "${user.token}" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
+                                            <button data-accept-token = "${user.token}" class="text-sm bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600">
                                                 Accept
                                             </button>
-                                            <button data-reject-token = "${user.token}"  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                            <button data-reject-token = "${user.token}"  class="text-sm bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600">
                                                 Reject
                                             </button>
                                         </div>
@@ -572,13 +671,18 @@
         }
 
         function loadPosts() {
-            var id = $('#user-id').val();
+            var id = $('#group-id').val();
             $.ajax({
-                url: "{{ route('profile.post', ['user' => ':id']) }}".replace(':id', id),
+                url: '/group/getdata/' + id,
                 method: 'GET',
+                data: {
+                    type: 3,
+                },
                 dataType: 'json',
                 success: function(response) {
                     const posts = response.data.posts;
+                    const group_id = response.data.id;
+                    const group_name = response.data.name;
                     const avatarPath = response.data.avatar_path ? response.data.avatar_path :
                         '/storage/uploads/avatars/user-default.webp';
                     const userId = response.data.id;
@@ -587,14 +691,20 @@
                     postsContainer.empty();
                     posts.forEach((post, index) => {
                         const isLongContent = post.body.length > 400;
-                        const check = post.check ? '' : 'hidden';
+                        const check = post.check || response.checkPermission ? '' : 'hidden';
                         const postHtml = `
                                 <div id="has-post" class="mx-5 rounded shadow mb-4 bg-white">
                                     <div class="flex items-center justify-between mb-1 px-3 py-3">
                                         <div class ="flex gap-3"> 
-                                            <img src="${avatarPath}" class="w-[48px] h-[48px] rounded-full border border-2 cursor-pointer hover:border-blue-500" alt="">
+                                            <img src="${post.user.avatar_path ? post.user.avatar_path : '/storage/uploads/avatars/user-default.webp'}" class="w-[48px] h-[48px] rounded-full border border-2 cursor-pointer hover:border-blue-500" alt="">
                                             <div>
-                                                <h3 class="font-bold text-lg hover:underline cursor-pointer"> <a href="/profile/${userId}">${name}</a></h3>
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <h3 class="font-bold text-lg hover:underline cursor-pointer"> <a href="/profile/${post.user.user_id}">${post.user.name}</a></h3>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                                                    </svg>
+                                                    <h3 class="font-bold text-lg hover:underline cursor-pointer"> <a href="/group/${group_id}">${group_name}</a></h3>
+                                                </div>
                                                 <p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleString()}</p>
                                             </div>    
                                         </div>
@@ -639,8 +749,8 @@
                                     </div>
                                     <div class="grid ${post.attechments.length == 1 ? 'grid-cols-1 justify-items-center align-items-center' : 'grid-cols-2'} post gap-1 px-2 py-2">    
                                     ${post.attechments && post.attechments.length > 0 ? post.attechments.map(attechment => `
-                                                    <img class="${post.attechments.length == 1 ? 'w-1/2' : 'w-ful'} post-image object-cover w-full aspect-square" src="${attechment.path}" alt="">
-                                                `).join('') : ''}
+                                                            <img class="${post.attechments.length == 1 ? 'w-1/2' : 'w-ful'} post-image object-cover w-full aspect-square" src="${attechment.path}" alt="">
+                                                        `).join('') : ''}
                                     </div>
                                     <div class="flex items-center gap-5 px-5 py-5">
                                         <button data-post-id = "${post.id}" class="like-${post.id} like-button py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
@@ -673,15 +783,15 @@
                                         }
                                     </div>
                                 </div>
-                                </div>
+
                             `;
 
                         postsContainer.append(postHtml);
-                        
+
                         if (post.comments && post.comments.length > 0) {
-                                renderComments(post.comments); 
-                            }
-                        })
+                            renderComments(post.comments);
+                        }
+                    })
 
                     $('.toggleBtn').on('click', function() {
                         const index = $(this).data('index');
@@ -793,26 +903,26 @@
 
                     renderImages(2);
 
-                    if (editor) {
-                        editor.destroy()
-                            .then(() => {
-                                ClassicEditor
-                                    .create(document.querySelector('#edit-post'))
-                                    .then(newEditor => {
-                                        editor = newEditor;
-                                    })
-                                    .catch(error => {
-                                        console.error(error);
-                                    });
-                            })
-                            .catch(error => {
-                                console.error('Error while destroying CKEditor:', error);
-                            });
+                    if (editPost) {
+                        editPost.destroy().then(() => {
+                            ClassicEditor
+                                .create(document.querySelector('#edit-post'))
+                                .then(newEditor => {
+                                    editPost = newEditor;
+                                    editPost.setData(response.data.body); // Đưa dữ liệu từ API vào editor
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                });
+                        }).catch(error => {
+                            console.error(error);
+                        });
                     } else {
                         ClassicEditor
                             .create(document.querySelector('#edit-post'))
                             .then(newEditor => {
-                                editor = newEditor;
+                                editPost = newEditor;
+                                editPost.setData(response.data.body); // Đưa dữ liệu từ API vào editor
                             })
                             .catch(error => {
                                 console.error(error);
@@ -860,9 +970,82 @@
 
             loadPosts();
             loadUsers();
+            loadPhoto();
+
+            ClassicEditor
+            .create(document.querySelector('#new-post'))
+            .then(newEditor => {
+                newPost = newEditor;
+                newPost.model.document.on('change:data', () => {
+                    if (newPost.getData() !== '') {
+                        $('.btn-group').show();
+                    } else {
+                        $('.btn-group').hide();
+                    }
+                });
+
+                newPost.editing.view.document.on('focus', () => {
+                    $('.btn-group').show();
+                });
+
+                newPost.editing.view.document.on('blur', () => {
+                    if (newPost.getData().trim() === "") {
+                        $('.btn-group').hide();
+                    }
+                });
+            })
+            .catch(error => {
+
+            });
+
+            $('#btn-save').on('click', function() {
+
+            const value = newPost.getData();
+            var group_id = $('#group-id').val();
+
+
+            const body = value
+                .replace(/<h1>/g, '<h1 class="ck-content">')
+                .replace(/<h2>/g, '<h2 class="ck-content">')
+                .replace(/<h3>/g, '<h3 class="ck-content">')
+                .replace(/<ul>/g, '<ul class="ck-content">')
+                .replace(/<li>/g, '<li class="ck-content">')
+                .replace(/<ol>/g, '<ol class="ck-content">');
+
+            let formData = new FormData();
+            formData.append('group_id', group_id)
+            formData.append('body', body);
+            formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+            filesArray.forEach(function(file, index) {
+                formData.append('arrayImage[]', file);
+            });
+
+                $.ajax({
+                    url: '/post/store',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        swal("Good job!", response.message, response.status);
+                        $('#new-post').val('');
+                        newPost.setData('');
+                        var previewContainer = $('#file-preview');
+                        previewContainer.html('');
+                        images = [];
+                        filesArray = [];
+                        const postsContainer = $('#postsContainer');
+                        postsContainer.empty();
+                        loadPosts(1);
+                    },
+                });
+            });
+
 
             $('#followings-tab').on('click', function() {
-                if(!checkLoadRequest) {
+                if (!checkLoadRequest) {
                     loadRequest();
                     checkLoadRequest = true;
                 }
@@ -870,7 +1053,8 @@
 
             $(document).on('click', '[data-accept-token]', function() {
                 const token = $(this).data('accept-token');
-                const parentDiv = $(this).closest('.flex.items-center.justify-between.shadow-md.bg-slate-400.p-4.rounded-md');
+                const parentDiv = $(this).closest(
+                    '.flex.items-center.justify-between.shadow-md.bg-slate-400.p-4.rounded-md');
                 $.ajax({
                     url: `/group/accept_approve/${token}`,
                     method: 'GET',
@@ -886,7 +1070,8 @@
 
             $(document).on('click', '[data-reject-token]', function() {
                 const token = $(this).data('reject-token');
-                const parentDiv = $(this).closest('.flex.items-center.justify-between.shadow-md.bg-slate-400.p-4.rounded-md');
+                const parentDiv = $(this).closest(
+                    '.flex.items-center.justify-between.shadow-md.bg-slate-400.p-4.rounded-md');
                 $.ajax({
                     url: `/group/reject_approve/${token}`,
                     method: 'GET',
@@ -1044,7 +1229,7 @@
 
                         const commentButton = $(`.comment-${postId}`);
                         const commentText = commentButton.find('.text-comment-count');
-                        commentText.text(`(${response.comments_count})`);
+                        commentText.text(`Comment (${response.comments_count})`);
 
                     },
                 });
@@ -1174,7 +1359,7 @@
                                     const commentButton = $(`.comment-${postId}`);
                                     const commentText = commentButton.find(
                                         '.text-comment-count');
-                                    commentText.text(`(${response.comments_count})`);
+                                    commentText.text(`Comment (${response.comments_count})`);
                                 },
                             });
                         } else {
@@ -1330,6 +1515,14 @@
                 var id = $('#group-id').val();
                 var user = $('#invite-user').val();
 
+                var button = $(this);
+                var loadingIcon = $('#loading-icon');
+                var buttonText = $('#button-text');
+
+                button.prop('disabled', true);
+                loadingIcon.show();
+                buttonText.text('Inviting...');
+
                 $.ajax({
                     url: '/group/invite/' + id,
                     method: 'POST',
@@ -1346,13 +1539,24 @@
                         } else {
                             swal("Error", response.message, response.status);
                         }
-                    }, 
+                        button.prop('disabled', false);
+                        loadingIcon.hide();
+                        buttonText.text('Invite Users');
+                    },
                 })
             })
 
             $('#join-group').on('click', function() {
 
                 var id = $('#group-id').val();
+
+                var button = $(this);
+                var loadingIcon = $('#loading-join-icon');
+                var buttonText = $('#button-join-text');
+
+                button.prop('disabled', true);
+                loadingIcon.show();
+                buttonText.text('Joining...');
 
                 $.ajax({
                     url: '/group/auto_approve/' + id,
@@ -1368,13 +1572,21 @@
                         } else {
                             swal("Error", response.message, response.status);
                         }
-                    }, 
+                    },
                 })
             })
 
             $('#request-group').on('click', function() {
 
                 var id = $('#group-id').val();
+
+                var button = $(this);
+                var loadingIcon = $('#loading-request-icon');
+                var buttonText = $('#button-request-text');
+
+                button.prop('disabled', true);
+                loadingIcon.show();
+                buttonText.text('Requesting...');
 
                 $.ajax({
                     url: '/group/request_approve/' + id,
@@ -1387,13 +1599,13 @@
                         if (response.status == 'success') {
                             swal("Good job!", response.message, response.status);
                             $('#request-group')
-                                .addClass('opacity-50 cursor-not-allowed') 
-                                .prop('disabled', true)                    
-                                .text('Your request has been sent.'); 
+                                .addClass('opacity-50 cursor-not-allowed')
+                                .prop('disabled', true)
+                                .text('Your request has been sent.');
                         } else {
                             swal("Error", response.message, response.status);
                         }
-                    }, 
+                    },
                 })
             })
 

@@ -16,4 +16,8 @@ class PostAttechment extends Model
         'mime',
         'created_by'
     ];
+
+    public function post() {
+        return $this->belongsTo(Post::class);
+    }
 }

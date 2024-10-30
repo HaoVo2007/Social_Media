@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Follower;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
 
+use function Laravel\Prompts\search;
 
 class ProfileController extends Controller
 {
@@ -20,8 +22,17 @@ class ProfileController extends Controller
     public function index(Request $request , $user) {
 
         $data = User::findOrFail($user);
+
+        $check = Follower::where('user_id', $request->user()->id)->where('follower_id', $user)->exists();
+
+        $follower = Follower::where('follower_id', $user)->count();
+        $following = Follower::where('user_id', $user)->count();
+
         return view('profile.index', [
             'user' => $data,
+            'check_follow' => $check,
+            'follower' => $follower,
+            'following' => $following,
         ]);
     }
 
@@ -191,5 +202,85 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    public function follow(Request $request) {
+
+        $follow = $request->follow_id;
+
+        $check_follow = Follower::where('user_id', $request->user()->id)->where('follower_id', $follow)->first();
+
+        if ($check_follow) {
+
+            $check_follow->delete();
+
+            $follower = Follower::where('follower_id', $follow)->count();
+            $following = Follower::where('user_id', $follow)->count();
+
+            return response()->json([
+                'check' => 'follow',
+                'follower' => $follower,
+                'following' => $following,
+            ]);
+
+        } else {
+
+            $data = Follower::create([
+                'user_id' => $request->user()->id,
+                'follower_id' => $follow,
+            ]);
+   
+            $follower = Follower::where('follower_id', $follow)->count();
+            $following = Follower::where('user_id', $follow)->count();
+
+            return response()->json([
+                'check' => 'unfollow',
+                'follower' => $follower,
+                'following' => $following,
+            ]);
+
+        }
+
+    }
+
+    public function getData(Request $request) {
+        
+        $type = $request->type;
+        $follow = $request->follow_id;
+        $search = $request->search ? $request->search : '';
+
+        if ($type ==  1) {
+
+            $data = Follower::with('user')
+                ->where('follower_id', $follow)
+                ->paginate(10);
+
+            return response()->json([
+                'data' => $data,
+            ]);
+
+        } else if ($type == 2) {
+
+            $data = Follower::with('user')
+                ->where('user_id', $follow)
+                ->paginate(10);
+
+            return response()->json([
+                'data' => $data,
+            ]);
+
+        } else if ($type == 3) {
+
+            $data = Follower::with('user')
+                ->where('user_id', $request->user()->id)
+                ->whereHas('user', function ($query) use ($search) {
+                    $query->where('name', 'LIKE', '%' . $search . '%'); 
+                })
+                ->paginate(10);
+
+            return response()->json([
+                'data' => $data,
+            ]);
+        }
     }
 }

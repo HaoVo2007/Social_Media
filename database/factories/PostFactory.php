@@ -16,7 +16,7 @@ class PostFactory extends Factory
         return [
             'body' => $this->faker->paragraph,
             'user_id' => User::inRandomOrder()->first()->id,
-            'group_id' => null, 
+            'group_id' => Group::inRandomOrder()->first()->id, 
             'deleted_by' => null,
             'delete_at' => null,
         ];

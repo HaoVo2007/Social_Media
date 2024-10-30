@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\GroupUser;
+use App\Models\PostAttechment;
 use App\Models\User;
 use App\Notifications\InvoiceAdminApprove;
 use App\Notifications\InvoiceInGroup;
@@ -89,6 +90,10 @@ class GroupController extends Controller
 
     public function getData(Request $request, $id) {
 
+        $user_id = $request->user()->id;
+
+        $checkPermission = false;
+
         $type = $request->type;
 
         if ($type == 1) {
@@ -97,7 +102,11 @@ class GroupController extends Controller
                 $query->where('status', 'approve');
             }, 'groupUsers.user'])->find($id);
 
-            $checkPermission = $data->user_id == $request->user()->id;
+            $data->groupUsers->each(function($groupUser) use ($user_id, &$checkPermission) {
+                if ($groupUser->user_id == $user_id && $groupUser->role == 'admin') { 
+                    $checkPermission = true;
+                }
+            });
     
             if ($data->getCurrentUser === null) { 
     
@@ -123,7 +132,50 @@ class GroupController extends Controller
                 $query->where('status', 'pending');
             }, 'groupUsers.user'])->find($id);
 
-            $checkPermission = $data->user_id == $request->user()->id;
+            $data->groupUsers->each(function($groupUser) use ($user_id, &$checkPermission) {
+                if ($groupUser->user_id == $user_id && $groupUser->role == 'admin') { 
+                    $checkPermission = true;
+                }
+            });
+
+            return response()->json([
+                'data' => $data,
+                'checkPermission' => $checkPermission,
+            ]);
+        } else if ($type == 3) {
+
+            $currentUser = $request->user();
+
+            $data = Group::with([
+                'posts.user',
+                'posts.attechments',
+                'posts.reactions',
+                'posts.comments' => function ($query) {
+                   $query->whereNull('parent_id')->with(['user', 'commentLikes', 'children']);
+                },
+                'posts' => function($query) {
+                   $query->withCount('comments');
+                },
+                ])->findOrFail($id);
+
+                $data->posts->map(function($post) use ($currentUser) {
+                    $post->check = $post->user_id == $currentUser->id;
+                    $post->currentReaction = $post->reactions->where('user_id', $currentUser->id)->isNotEmpty();
+                    $post->totalLike = $post->reactions->where('type', 'like')->count();
+        
+                    $post->comments->map(function($comment) use ($currentUser) {
+                        $comment->currentReaction = $comment->commentLikes->where('user_id', $currentUser->id)->isNotEmpty();
+                        $comment->total = $comment->commentLikes->where('type', 'like')->count();
+                        $comment->check = $comment->user_id == $currentUser->id;    
+                        $comment->is_check = $comment->user_id == $currentUser->id ? 1 : 0;
+                    });
+                });
+
+                $data->groupUsers->each(function($groupUser) use ($user_id, &$checkPermission) {
+                    if ($groupUser->user_id == $user_id && $groupUser->role == 'admin') { 
+                        $checkPermission = true;
+                    }
+                });
 
             return response()->json([
                 'data' => $data,
@@ -392,16 +444,13 @@ class GroupController extends Controller
 
             $title = 'Your reject request group successfully !';
 
-            $data->token_user = Carbon::now();
-            $data->status = 'not_approve';
-            $data->save();
-
             $group = Group::findorFail($data->group_id);
             $user = User::findOrFail($data->user_id);
             $adminUser = User::findOrFail($data->created_by);
 
-
             $user->notify(new InvoiceUserApprove($group, $adminUser, $type = 2));
+
+            $data->delete();
             
             return response()->json([
                 'status' => 'success',
@@ -464,5 +513,17 @@ class GroupController extends Controller
                 'data' => $data,
             ]);
         }
+    }
+
+    public function attechmentGroup(Request $request, $group) {
+
+        $attachments = PostAttechment::whereHas('post', function($query) use ($group) {
+            $query->where('group_id', $group);
+        })->pluck('path');
+
+        return response()->json([
+            'data' => $attachments,
+        ]);
+
     }
 }

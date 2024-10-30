@@ -22,6 +22,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/profile/follow', [ProfileController::class, 'follow'])->name('profile.follow');
+    Route::get('/profile/follow/getdata', [ProfileController::class, 'getData'])->name('profile.getData');
+
+
     //POST
     Route::get('/post', [PostController::class, 'index'])->name('post.index');
     Route::post('/post/store', [PostController::class, 'store'])->name('post.store');
@@ -47,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/group/request_approve/{group}', [GroupController::class, 'requestApprove'])->name('group.requestApprove');
     Route::get('/group/reject_approve/{token}', [GroupController::class, 'rejectRequest'])->name('group.rejectRequest');
     Route::get('/group/accept_approve/{token}', [GroupController::class, 'acceptRequest'])->name('group.acceptRequest');
+    Route::get('/group/attechment/{group}', [GroupController::class, 'attechmentGroup'])->name('group.attechmentGroup');
 });
 
 require __DIR__.'/auth.php';

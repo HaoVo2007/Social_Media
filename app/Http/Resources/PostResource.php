@@ -15,6 +15,7 @@ class PostResource extends JsonResource
             'id' => $this->id,
             'body' => $this->body,
             'user' => $this->user, 
+            'group' => $this->group,
             'attechments' => $this->attechments,
             'reactions' =>  $this->reactions,
             'comments' => CommentResource::collection($this->whenLoaded('comments')),

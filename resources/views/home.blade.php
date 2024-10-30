@@ -145,7 +145,12 @@
                     </div>
 
                     <div id="has-group" class="max-h-[500px] overflow-y-auto">
-                    
+                        <div id="loading-group" style="display: none" class="flex items-center mx-auto justify-center w-56 h-56">
+                            <div role="status">
+                                <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -196,13 +201,14 @@
                             type="text" placeholder="Find your following" name="" id="search-following">
                     </div>
 
-                    <div id="has-group" class="max-h-[500px] overflow-y-auto">
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="https://picsum.photos/100" class="w-[48px] h-[48px] rounded-full"
-                                alt="">
-                            <div>
-                                <h3 class="font-bold text-md">Conversation</h3>
-                            </div>
+                    <div id="following-container" class="max-h-[500px] overflow-y-auto">
+                        
+                    </div>
+
+                    <div id="loading-following" style="display: none" class="flex items-center mx-auto justify-center w-56 h-56">
+                        <div role="status">
+                            <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                            <span class="sr-only">Loading...</span>
                         </div>
                     </div>
                 </div>
@@ -354,8 +360,17 @@
     let images = [];
     let filesArray = [];
     let page = 1;
+    let pageGroup = 1; 
+    let pageFollwing = 1;
     let isLoading;  
     let debounceTimer;
+    let search = '';
+    let searchFollowing = '';
+    let isLoadingGroup;
+    let isLoadingFollwing;
+    let hasPost = false;
+    let hasGroup = false;
+    let hasFollow = false;
 
     function renderComments(comments, postId) {
         comments.forEach(comment => {
@@ -430,6 +445,9 @@
                 const posts = response.data;
                 const postsContainer = $('#postsContainer');
                 // postsContainer.empty();
+                if (posts.length === 0 || posts.length < 10) {
+                    hasPost = true;
+                }
                 posts.forEach((post, index) => {
                     const postId = post.id;
                     const isLongContent = post.body.length > 400;
@@ -442,7 +460,18 @@
                                     <div class ="flex gap-3"> 
                                         <img src="${avatarPath}" class="w-[48px] h-[48px] rounded-full border border-2 cursor-pointer hover:border-blue-500" alt="">
                                         <div>
-                                            <h3 class="font-bold text-lg hover:underline cursor-pointer"> <a href="/profile/${post.user.id}">${post.user.name}</a></h3>
+                                            <div class="flex items-center justify-between gap-2">
+                                                <h3 class="font-bold text-lg hover:underline cursor-pointer"> <a href="/profile/${post.user.id}">${post.user.name}</a></h3>
+                                                   ${post.group?.id ? `
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                                                        </svg>
+                                                        <h3 class="font-bold text-lg hover:underline cursor-pointer">
+                                                            <a href="/group/${post.group.id}">${post.group.name}</a>
+                                                        </h3>
+                                                ` : ''}
+
+                                            </div>
                                             <p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleString()}</p>
                                         </div>    
                                     </div>
@@ -588,7 +617,6 @@
                 $('#name-user a').text(response.data.user.name);
                 $('#name-user a').attr('href', '/user/profile/' + response.data.user.id);
                 $('#created-post').text(created_at);
-                $('#edit-post').val(response.data.body);
                 $('#post-id').val(response.data.id);
 
                 const attachmentsContainer = $('#attachments-container');
@@ -604,29 +632,30 @@
 
                 renderImages(2);
 
+
                 if (editPost) {
-                    editPost.destroy()
-                        .then(() => {
-                            ClassicEditor
-                                .create(document.querySelector('#edit-post'))
-                                .then(newEditor => {
-                                    editPost = newEditor;
-                                })
-                                .catch(error => {
-
-                                });
-                        })
-                        .catch(error => {
-
-                        });
+                    editPost.destroy().then(() => {
+                        ClassicEditor
+                            .create(document.querySelector('#edit-post'))
+                            .then(newEditor => {
+                                editPost = newEditor;
+                                editPost.setData(response.data.body); // Đưa dữ liệu từ API vào editor
+                            })
+                            .catch(error => {
+                                console.error(error);
+                            });
+                    }).catch(error => {
+                        console.error(error);
+                    });
                 } else {
                     ClassicEditor
                         .create(document.querySelector('#edit-post'))
                         .then(newEditor => {
                             editPost = newEditor;
+                            editPost.setData(response.data.body); // Đưa dữ liệu từ API vào editor
                         })
                         .catch(error => {
-
+                            console.error(error);
                         });
                 }
 
@@ -656,22 +685,28 @@
         })
     }
 
-    function loadGroup(page, search) {
+    function loadGroup(pageGroup, search) {
 
-        isLoading = false
+        isLoadingGroup = false
 
-        $('#loading').show();
+        $('#loading-group').show();
 
         $.ajax({
-            url: '/group?page=' + page,
+            url: '/group?page=' + pageGroup,
             method: 'GET',
             data: {
                 search: search,
             },
             dataType: 'json',
             success: function(response) {
+                $('#loading-group').hide();
                 let groups; 
                 groups = response.data.data;    
+
+                if (groups.length === 0 || groups.length < 10) {
+                    hasGroup = true;
+                }
+
                 groupContainer = $('#has-group');
                 groups.forEach(function(group, index) {
                     const renderGroup = `
@@ -690,8 +725,51 @@
             }
         })
 
-        isLoading = true;
+        isLoadingGroup = true;
 
+    }
+
+    function loadFollowing (page, searchFollowing) {
+
+        isLoadingFollwing = false
+
+        $('#loading-following').show();
+
+        $.ajax({
+            url: '/profile/follow/getdata?page=' + page,
+            method: 'GET',
+            data: {
+                search: searchFollowing,
+                type: 3,
+            },
+            dataType: 'json',
+            success: function(response) {
+                $('#loading-following').hide();
+                let groups; 
+                groups = response.data.data;    
+
+                if (groups.length === 0 || groups.length < 10) {
+                    hasFollow = true;
+                }
+
+                groupContainer = $('#following-container');
+                groups.forEach(function(group, index) {
+                    const renderGroup = `
+                    <a href="/profile/${group.user.id}">
+                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
+                            <img src="${group.user.avatar_path ? group.user.avatar_path : '/storage/uploads/groups/default-group.jpg'}" class="w-[48px] h-[48px] rounded-full" alt="">
+                            <div>
+                                <h3 class="font-bold text-lg">${group.user.name}</h3>
+                            </div>
+                        </div>
+                    </a>
+                    `;
+                    groupContainer.append(renderGroup); 
+                });
+            }
+        })
+
+        isLoadingFollwing = true;
     }
 
     $(document).ready(function() {
@@ -711,15 +789,52 @@
 
         loadPosts(page)
 
-        loadGroup(page, search = null)
+        loadGroup(pageGroup, search = null)
+
+        loadFollowing(pageFollwing, searchFollowing = null)
 
         $(window).scroll(function() {
             if($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
-                if (isLoading == true) {
+                if (isLoading == true && !hasPost) {
                     page++; 
                     loadPosts(page);
                 } 
             }
+        });
+
+        $('#has-group').on('scroll', function() {
+            if ($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight) {
+                if (isLoadingGroup && !hasGroup) {
+                    pageGroup++;
+                    loadGroup(pageGroup, search); 
+                }
+            }
+        });
+
+        $('#following-container').on('scroll', function() {
+            if ($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight) {
+                if (isLoadingFollwing && !hasFollow) {
+                    pageFollwing++;
+                    loadFollowing(pageFollwing, search); 
+                }
+            }
+        });
+
+        $('#search-following').on('keyup', function() {
+
+            clearTimeout(debounceTimer);
+
+            debounceTimer = setTimeout(function() {
+
+                var searchFollowing = $('#search-following').val();
+
+                groupContainer = $('#following-container');
+
+                groupContainer.empty();
+
+                loadFollowing(pageFollwing = 1, searchFollowing)
+
+            }, 500); 
         });
 
         $('#search-group').on('keyup', function() {

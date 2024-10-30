@@ -45,5 +45,9 @@ class Group extends Model
         return $this->hasMany(GroupUser::class);
     }
 
+    public function posts() {
+        return $this->hasMany(Post::class);
+    }
+
 
 }
