@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Follower;
+use App\Models\PostAttechment;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -271,9 +272,9 @@ class ProfileController extends Controller
 
         } else if ($type == 3) {
 
-            $data = Follower::with('user')
+            $data = Follower::with('following')
                 ->where('user_id', $request->user()->id)
-                ->whereHas('user', function ($query) use ($search) {
+                ->whereHas('following', function ($query) use ($search) {
                     $query->where('name', 'LIKE', '%' . $search . '%'); 
                 })
                 ->paginate(10);
@@ -282,5 +283,46 @@ class ProfileController extends Controller
                 'data' => $data,
             ]);
         }
+    }
+
+    public function attechmentProfile($user) {
+        
+        $data = PostAttechment::whereHas('post', function($query) use ($user) {
+            $query->where('user_id', $user);
+        })->pluck('path');
+
+        return response()->json([
+            'data' => $data,
+        ]);
+
+    }
+
+    public function getDataFollow(Request $request, $user) {
+        
+        $type = $request->type;
+
+        if ($type == 1) {
+
+            $data = Follower::with('follower')
+                ->where('follower_id', $user)
+                ->get();
+            
+            return response()->json([
+                'data' => $data,
+            ]);
+
+        } else if ($type == 2) {
+
+            $data = Follower::with('following')
+                ->where('user_id', $user)
+                ->get();
+            
+            return response()->json([
+                'data' => $data,
+            ]);
+
+        }
+
+    
     }
 }

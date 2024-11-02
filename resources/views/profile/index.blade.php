@@ -182,16 +182,18 @@
             <div class="text-center px-14">
                 <div class="flex items-center justify-center gap-5 mb-2">
                     <h2 class="text-gray-800 text-3xl font-bold">{{ $user->name }}</h2>
-                    <button id="btn-follow"
-                        class="rounded-lg mt-1 text-sm bg-indigo-600 px-5 py-2 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                        <span id="text-follow" class="">
-                            @if ($check_follow)
-                                Unfollow
-                            @else
-                                Follow
-                            @endif
-                        </span>
-                    </button>
+                    @if ($user->id != Auth::user()->id)
+                        <button id="btn-follow"
+                            class="rounded-lg mt-1 text-sm bg-indigo-600 px-5 py-2 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                            <span id="text-follow" class="">
+                                @if ($check_follow)
+                                    Unfollow
+                                @else
+                                    Follow
+                                @endif
+                            </span>
+                        </button>
+                    @endif
                 </div>
                 <a class="text-gray-400 mt-2 hover:text-blue-500" href="https://www.instagram.com/immohitdhiman/"
                     target="BLANK()">{{ $user->email }}</a>
@@ -287,27 +289,21 @@
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="followes" role="tabpanel"
                         aria-labelledby="followes-tab">
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">This is some placeholder
-                            content
-                            the <strong class="font-medium text-gray-800 dark:text-white">Settings tab's
-                                associated content</strong>. Clicking another tab will toggle the visibility
-                            of this one for the next. The tab JavaScript swaps classes to control the
-                            content visibility and styling.</p>
+                        <div id="all-follower" class="grid grid-cols-2 gap-4">
+
+                        </div>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="followings" role="tabpanel"
                         aria-labelledby="followings-tab">
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">This is some placeholder
-                            content
-                            the <strong class="font-medium text-gray-800 dark:text-white">Contacts tab's
-                                associated content</strong>. Clicking another tab will toggle the visibility
-                            of this one for the next. The tab JavaScript swaps classes to control the
-                            content visibility and styling.</p>
+                        <div id="all-following" class="grid grid-cols-2 gap-4">
+
+                        </div>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800 hidden" id="photos" role="tabpanel"
                         aria-labelledby="photos-tab">
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">This is some placeholder
-                            content
-                            the <strong class="font-medium text-gray-800 dark:text-white">dsafdsadsadas</p>
+                        <div id="all-photo" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -469,7 +465,28 @@
                     const userId = response.data.id;
                     const name = response.data.name;
                     const postsContainer = $('#postsContainer');
+
                     postsContainer.empty();
+                    
+                    if (posts.length < 10) {
+                        hasPost = true;
+                        if (posts.length === 0) {
+                            const postHtml = `
+                                    <div class="flex items-center justify-center">
+                                                    <div class="text-center">
+                                                        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                                        </svg>
+                                                        <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                                        <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                                    </div>
+                                                </div>
+                                    `;
+                            postsContainer.append(postHtml);
+                        }
+
+                    }
+
                     posts.forEach((post, index) => {
                         const isLongContent = post.body.length > 400;
                         const check = post.check ? '' : 'hidden';
@@ -728,6 +745,141 @@
             })
         }
 
+        function loadPhoto() {
+
+            var id = $('#user-id').val();
+
+            $.ajax({
+                url: '/profile/attechment/' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    const userContainer = $('#all-photo');
+                    userContainer.empty();
+                    if (response.data.length == 0) {
+                        userContainer.removeClass('md:grid-cols-3 grid-cols-2').addClass('grid-cols-1');
+                        const userHtml = `
+                            <div class="flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                        </svg>
+                                        <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                        <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                    </div>
+                                </div>
+                        `;
+                        userContainer.append(userHtml);
+                    } else {
+                        const users = response.data;
+
+                        users.forEach(function(user, index) {
+                            const userHtml = `
+                                <div>
+                                    <img class="h-auto max-w-full rounded-lg" src="${user}" alt="">
+                                </div>
+                            `;
+                            userContainer.append(userHtml);
+                        });
+                    }
+                }
+            });
+        }
+
+        function loadFollower() {
+            var id = $('#user-id').val();
+
+            $.ajax({
+                url: '/profile/getdata/folow/' + id,
+                method: 'GET',
+                data: {
+                    type: 1,
+                },
+                dataType: 'json',
+                success: function(response) {
+                    const userContainer = $('#all-follower');
+                    userContainer.empty();
+
+                    if (response.data.length == 0) {
+                        userContainer.removeClass('grid-cols-2').addClass('grid-cols-1');
+                        const userHtml = `
+                            <div class="flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                        </svg>
+                                        <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                        <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                    </div>
+                                </div>
+                        `;
+                        userContainer.append(userHtml);
+                    } else {
+                        const users = response.data
+                        users.forEach(function(user, index) {
+                            const userHtml = `
+                                <div class="flex items-center justify-start shadow-md bg-slate-400 p-4 rounded-md">
+                                    <img src="${user.follower.avatar_path ? user.follower.avatar_path : '/storage/uploads/avatars/user-default.webp'}" alt="User Avatar" class="w-10 h-10 rounded-full mr-2">
+                                    <h3 class="font-bold text-lg hover:underline cursor-pointer">
+                                        <a href="/profile/${user.follower.id}">${user.follower.name}</a>
+                                    </h3>
+                                </div>
+                            `;
+                            userContainer.append(userHtml);
+                        });
+                    }
+                }
+            });
+        }
+
+        function loadFollowing() {
+
+            var id = $('#user-id').val();
+
+            $.ajax({
+                url: '/profile/getdata/folow/' + id,
+                method: 'GET',
+                data: {
+                    type: 2,
+                },
+                dataType: 'json',
+                success: function(response) {
+                    const userContainer = $('#all-following');
+                    userContainer.empty();
+
+                    if (response.data.length == 0) {
+                        userContainer.removeClass('grid-cols-2').addClass('grid-cols-1');
+                        const userHtml = `
+                            <div class="flex items-center justify-center">
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                        </svg>
+                                        <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                        <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                    </div>
+                                </div>
+                        `;
+                        userContainer.append(userHtml);
+                    } else {
+                        const users = response.data;
+
+                        users.forEach(function(user, index) {
+                            const userHtml = `
+                                <div class="flex items-center justify-start shadow-md bg-slate-400 p-4 rounded-md">
+                                    <img src="${user.following.avatar_path ? user.following.avatar_path : '/storage/uploads/avatars/user-default.webp'}" alt="User Avatar" class="w-10 h-10 rounded-full mr-2">
+                                    <h3 class="font-bold text-lg hover:underline cursor-pointer">
+                                        <a href="/profile/${user.following.id}">${user.following.name}</a>
+                                    </h3>
+                                </div>
+                            `;
+                            userContainer.append(userHtml);
+                        });
+                    }
+                }
+            });
+        }
+
         $(document).ready(function() {
 
             $.ajaxSetup({
@@ -744,6 +896,9 @@
             });
 
             loadPosts();
+            loadPhoto();
+            loadFollowing();
+            loadFollower();
 
             $('#close-modal').on('click', function() {
                 $('#modal-edit').hide();
@@ -910,7 +1065,7 @@
 
                         const commentButton = $(`.comment-${postId}`);
                         const commentText = commentButton.find('.text-comment-count');
-                        commentText.text(`(${response.comments_count})`);
+                        commentText.text(`Comment (${response.comments_count})`);
 
                     },
                 });
@@ -1040,7 +1195,7 @@
                                     const commentButton = $(`.comment-${postId}`);
                                     const commentText = commentButton.find(
                                         '.text-comment-count');
-                                    commentText.text(`(${response.comments_count})`);
+                                    commentText.text(`Comment (${response.comments_count})`);
                                 },
                             });
                         } else {

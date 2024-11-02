@@ -24,7 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile/follow', [ProfileController::class, 'follow'])->name('profile.follow');
     Route::get('/profile/follow/getdata', [ProfileController::class, 'getData'])->name('profile.getData');
-
+    Route::get('/profile/attechment/{user}', [ProfileController::class, 'attechmentProfile'])->name('profile.attechment');
+    Route::get('/profile/getdata/folow/{user}', [ProfileController::class, 'getDataFollow'])->name('profile.getDataFollow');
 
     //POST
     Route::get('/post', [PostController::class, 'index'])->name('post.index');

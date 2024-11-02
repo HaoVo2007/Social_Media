@@ -296,12 +296,15 @@
                                 id="followes-tab" data-tabs-target="#followes" type="button" role="tab"
                                 aria-controls="followes" aria-selected="false">Users</button>
                         </li>
-                        <li role="presentation">
-                            <button
-                                class="inline-block text-gray-500 hover:text-gray-600 hover:border-gray-300 rounded-t-lg py-4 px-4 text-sm font-medium text-center border-transparent border-b-2 dark:text-gray-400 dark:hover:text-gray-300"
-                                id="followings-tab" data-tabs-target="#followings" type="button" role="tab"
-                                aria-controls="followings" aria-selected="false">Request</button>
-                        </li>
+                        
+                        @if ($checkAdmin)
+                            <li role="presentation">
+                                <button
+                                    class="inline-block text-gray-500 hover:text-gray-600 hover:border-gray-300 rounded-t-lg py-4 px-4 text-sm font-medium text-center border-transparent border-b-2 dark:text-gray-400 dark:hover:text-gray-300"
+                                    id="followings-tab" data-tabs-target="#followings" type="button" role="tab"
+                                    aria-controls="followings" aria-selected="false">Request</button>
+                            </li>
+                        @endif
 
                         <li role="presentation">
                             <button
@@ -467,7 +470,7 @@
                     const userContainer = $('#all-photo');
                     userContainer.empty();
                     if (response.data.length == 0) {
-                        userContainer.removeClass('grid-cols-3').addClass('grid-cols-1');
+                        userContainer.removeClass('md:grid-cols-3 grid-cols-2').addClass('grid-cols-1');
                         const userHtml = `
                             <div class="flex items-center justify-center">
                                     <div class="text-center">
@@ -516,6 +519,7 @@
                         requestTabButton.removeClass('hidden');
                         requestTabContent.removeClass('hidden');
                         const users = response.data.group_users;
+                        console.log(users);
                         if (users.length == 0) {
                             userContainer.removeClass('grid-cols-2').addClass('grid-cols-1');
                             const noRequestHtml = `
@@ -689,6 +693,26 @@
                     const name = response.data.name;
                     const postsContainer = $('#postsContainer');
                     postsContainer.empty();
+
+                    if (posts.length < 10) {
+                        hasPost = true;
+                        if (posts.length === 0) {
+                            const postHtml = `
+                                    <div class="flex items-center justify-center">
+                                                    <div class="text-center">
+                                                        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                                        </svg>
+                                                        <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                                        <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                                    </div>
+                                                </div>
+                                    `;
+                            postsContainer.append(postHtml);
+                        }
+
+                    }
+
                     posts.forEach((post, index) => {
                         const isLongContent = post.body.length > 400;
                         const check = post.check || response.checkPermission ? '' : 'hidden';
@@ -1426,10 +1450,9 @@
                 $('#modal-image').attr('src', imagesPost[currentImageIndex]);
             });
 
-            $('.btn-attechment').on('change', function(event) {
+            $('.btn-attachment').on('change', function(event) {
                 var files = event.target.files;
                 var type = $(this).data('type');
-
                 if (type == 1) {
                     var previewContainer = $('#file-preview');
                 } else {
@@ -1470,7 +1493,7 @@
 
             $('#btn-edit-post').on('click', function() {
 
-                const value = editor.getData();
+                const value = editPost.getData();
 
                 const body = value
                     .replace(/<h1>/g, '<h1 class="ck-content">')

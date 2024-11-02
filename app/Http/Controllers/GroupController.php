@@ -78,12 +78,24 @@ class GroupController extends Controller
 
     public function detail(Request $request, $id) {
 
+        // $checkAdmin = false;
+
         $data = Group::withCount(['groupUsers' => function ($query) {
             $query->where('status', 'approve');
         }])->findOrFail($id);
 
+        $checkAdmin = $data->getAdminGroup->user_id == $request->user()->id;
+
+        // $data->getAdminGroup->map(function($user) use ($request, &$checkAdmin) {
+        //     if ($user->user_id == $request->user()->id) {
+        //         $checkAdmin = true;
+        //         return false;
+        //     }
+        // });
+
         return view('group.index', [
             'group' => $data,
+            'checkAdmin' => $checkAdmin,
         ]);
 
     }
@@ -96,13 +108,15 @@ class GroupController extends Controller
 
         $type = $request->type;
 
+        $dataCheck = Group::with(['groupUsers'])->find($id);
+
         if ($type == 1) {
 
             $data = Group::with(['groupUsers' => function ($query) {
                 $query->where('status', 'approve');
             }, 'groupUsers.user'])->find($id);
 
-            $data->groupUsers->each(function($groupUser) use ($user_id, &$checkPermission) {
+            $dataCheck->groupUsers->each(function($groupUser) use ($user_id, &$checkPermission) {
                 if ($groupUser->user_id == $user_id && $groupUser->role == 'admin') { 
                     $checkPermission = true;
                 }
@@ -131,8 +145,8 @@ class GroupController extends Controller
             $data = Group::with(['groupUsers' => function ($query) {
                 $query->where('status', 'pending');
             }, 'groupUsers.user'])->find($id);
-
-            $data->groupUsers->each(function($groupUser) use ($user_id, &$checkPermission) {
+            
+            $dataCheck->groupUsers->each(function($groupUser) use ($user_id, &$checkPermission) {
                 if ($groupUser->user_id == $user_id && $groupUser->role == 'admin') { 
                     $checkPermission = true;
                 }
@@ -171,7 +185,7 @@ class GroupController extends Controller
                     });
                 });
 
-                $data->groupUsers->each(function($groupUser) use ($user_id, &$checkPermission) {
+                $dataCheck->groupUsers->each(function($groupUser) use ($user_id, &$checkPermission) {
                     if ($groupUser->user_id == $user_id && $groupUser->role == 'admin') { 
                         $checkPermission = true;
                     }

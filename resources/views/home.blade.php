@@ -445,119 +445,136 @@
                 const posts = response.data;
                 const postsContainer = $('#postsContainer');
                 // postsContainer.empty();
-                if (posts.length === 0 || posts.length < 10) {
+                if (posts.length < 10) {
                     hasPost = true;
-                }
-                posts.forEach((post, index) => {
-                    const postId = post.id;
-                    const isLongContent = post.body.length > 400;
-                    const avatarPath = post.user.avatar_path ? post.user.avatar_path :
-                        '/storage/uploads/avatars/user-default.webp';
-                    const check = post.check_user ? '' : 'hidden';
-                    const postHtml = `
-                            <div id="has-post" class="mx-5 rounded shadow mb-4 bg-white">
-                                <div class="flex items-center justify-between mb-1 px-3 py-3">
-                                    <div class ="flex gap-3"> 
-                                        <img src="${avatarPath}" class="w-[48px] h-[48px] rounded-full border border-2 cursor-pointer hover:border-blue-500" alt="">
-                                        <div>
-                                            <div class="flex items-center justify-between gap-2">
-                                                <h3 class="font-bold text-lg hover:underline cursor-pointer"> <a href="/profile/${post.user.id}">${post.user.name}</a></h3>
-                                                   ${post.group?.id ? `
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
-                                                        </svg>
-                                                        <h3 class="font-bold text-lg hover:underline cursor-pointer">
-                                                            <a href="/group/${post.group.id}">${post.group.name}</a>
-                                                        </h3>
-                                                ` : ''}
-
+                    if (posts.length === 0) {
+                        const postHtml = `
+                                <div class="flex items-center justify-center">
+                                                <div class="text-center">
+                                                    <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                                    </svg>
+                                                    <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                                    <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                                </div>
                                             </div>
-                                            <p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleString()}</p>
-                                        </div>    
+                                `;
+                        postsContainer.append(postHtml);
+                    }
+
+                }
+
+                    posts.forEach((post, index) => {
+                        const postId = post.id;
+                        const isLongContent = post.body.length > 400;
+                        const avatarPath = post.user.avatar_path ? post.user.avatar_path :
+                            '/storage/uploads/avatars/user-default.webp';
+                        const check = post.check_user ? '' : 'hidden';
+                        const postHtml = `
+                                <div id="has-post" class="mx-5 rounded shadow mb-4 bg-white">
+                                    <div class="flex items-center justify-between mb-1 px-3 py-3">
+                                        <div class ="flex gap-3"> 
+                                            <img src="${avatarPath}" class="w-[48px] h-[48px] rounded-full border border-2 cursor-pointer hover:border-blue-500" alt="">
+                                            <div>
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <h3 class="font-bold text-lg hover:underline cursor-pointer"> <a href="/profile/${post.user.id}">${post.user.name}</a></h3>
+                                                    ${post.group?.id ? `
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                                                            </svg>
+                                                            <h3 class="font-bold text-lg hover:underline cursor-pointer">
+                                                                <a href="/group/${post.group.id}">${post.group.name}</a>
+                                                            </h3>
+                                                    ` : ''}
+
+                                                </div>
+                                                <p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleString()}</p>
+                                            </div>    
+                                        </div>
+
+                                        <div class="relative ${check}">
+                                            <button data-post-id="${post.id}" class="show-option inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button">
+                                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 4 15">
+                                                    <path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
+                                                </svg>
+                                            </button>
+
+                                            <div id="post-options-${post.id}" class="post-options hidden absolute top-full right-0 mt-1 z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                                                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                                    <li class= "mb-2">
+                                                        <button data-post-id="${post.id}" class="edit-post flex items-center gap-3 w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                                            </svg>
+                                                            <p class="text-sm text-gray-500">Edit</p>
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button data-post-id="${post.id}" class="delete-post flex items-center gap-3 w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-red-500">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                                            </svg>
+                                                            <p class="text-sm text-gray-500">Delete</p>
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <div class="relative ${check}">
-                                        <button data-post-id="${post.id}" class="show-option inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button">
-                                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 4 15">
-                                                <path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
+                                    <div class="px-5 py-2">
+                                        <div id="content-${index}" style="max-height: ${isLongContent ? '4rem' : 'none'}; overflow: hidden;">
+                                            <div class="text-sm text-gray-500 overflow-hidden" class="post-content">
+                                                ${post.body}
+                                            </div>    
+                                        </div>
+                                        ${isLongContent ? `<button class="toggleBtn text-indigo-600 hover:text-indigo-500 font-semibold" data-index="${index}">Read more ...</button>` : ''}
+                                    </div>
+                                    <div class="grid ${post.attechments.length == 1 ? 'grid-cols-1 justify-items-center align-items-center' : 'grid-cols-2'} post gap-1 px-2 py-2">    
+                                    ${post.attechments && post.attechments.length > 0 ? post.attechments.map(attechment => `
+                                        <img class="post-image ${post.attechments.length == 1 ? 'w-1/2' : 'w-full'} object-cover aspect-square cursor-pointer" src="${attechment.path}" alt="">
+                                    `).join('') : ''}
+                                    </div>
+                                    <div class="flex items-center gap-2 px-2 py-2">
+                                        <button data-post-id = "${post.id}" class="like-${post.id} like-button py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" />
                                             </svg>
+                                            <span class="like-text text-sm text-slate-400">${post.current_user_reaction ? 'Unlike' : 'Like'}</span>
+                                            <span class="like-count text-sm text-slate-400">(${post.total_likes})</span>
                                         </button>
+                                        <button data-post-id = "${post.id}" class="comment-${post.id} comment-button py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                                            </svg>
+                                            <p class="text-comment-count text-sm text-slate-400">Comment (${post.total_comments})</p>
+                                        </button>
+                                    </div>
+                                    <div id="modal-comment-${post.id}" style="display:none" class="p-5">
+                                        <div class="flex items-center justify-center gap-5">
+                                            <textarea id="comment-${post.id}" name="comment" class="border-2 border-purple-600 p-2 w-full rounded" required></textarea>
 
-                                        <div id="post-options-${post.id}" class="post-options hidden absolute top-full right-0 mt-1 z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                                                <li class= "mb-2">
-                                                    <button data-post-id="${post.id}" class="edit-post flex items-center gap-3 w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                                                        </svg>
-                                                        <p class="text-sm text-gray-500">Edit</p>
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button data-post-id="${post.id}" class="delete-post flex items-center gap-3 w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-red-500">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                                        </svg>
-                                                        <p class="text-sm text-gray-500">Delete</p>
-                                                    </button>
-                                                </li>
-                                            </ul>
+                                            <button data-post-id = "${post.id}"   type="submit"
+                                                    class="send-comment bg-purple-700 text-white font-medium py-2 px-4 rounded hover:bg-purple-600">Comment
+                                            </button>
+                                        </div>
+                                        <div id="comment-list-${post.id}" class="comment-list w-full space-y-4 mt-5">
+                                        ${ post.comments && post.comments.length > 0 
+                                            ? `<div id="comment-list-${post.id}" class="comment-list w-full space-y-4 mt-5"></div>`
+                                            : ''
+                                        }
                                         </div>
                                     </div>
                                 </div>
-                                <div class="px-5 py-2">
-                                    <div id="content-${index}" style="max-height: ${isLongContent ? '4rem' : 'none'}; overflow: hidden;">
-                                        <div class="text-sm text-gray-500 overflow-hidden" class="post-content">
-                                            ${post.body}
-                                        </div>    
-                                    </div>
-                                    ${isLongContent ? `<button class="toggleBtn text-indigo-600 hover:text-indigo-500 font-semibold" data-index="${index}">Read more ...</button>` : ''}
-                                </div>
-                                <div class="grid ${post.attechments.length == 1 ? 'grid-cols-1 justify-items-center align-items-center' : 'grid-cols-2'} post gap-1 px-2 py-2">    
-                                ${post.attechments && post.attechments.length > 0 ? post.attechments.map(attechment => `
-                                    <img class="post-image ${post.attechments.length == 1 ? 'w-1/2' : 'w-full'} object-cover aspect-square cursor-pointer" src="${attechment.path}" alt="">
-                                `).join('') : ''}
-                                </div>
-                                <div class="flex items-center gap-2 px-2 py-2">
-                                    <button data-post-id = "${post.id}" class="like-${post.id} like-button py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" />
-                                        </svg>
-                                        <span class="like-text text-sm text-slate-400">${post.current_user_reaction ? 'Unlike' : 'Like'}</span>
-                                        <span class="like-count text-sm text-slate-400">(${post.total_likes})</span>
-                                    </button>
-                                    <button data-post-id = "${post.id}" class="comment-${post.id} comment-button py-2 bg-gray-500 rounded-full flex-1 flex items-center justify-center gap-2 hover:bg-slate-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-                                        </svg>
-                                        <p class="text-comment-count text-sm text-slate-400">Comment (${post.total_comments})</p>
-                                    </button>
-                                </div>
-                                <div id="modal-comment-${post.id}" style="display:none" class="p-5">
-                                    <div class="flex items-center justify-center gap-5">
-                                        <textarea id="comment-${post.id}" name="comment" class="border-2 border-purple-600 p-2 w-full rounded" required></textarea>
+                            `;
 
-                                        <button data-post-id = "${post.id}"   type="submit"
-                                                class="send-comment bg-purple-700 text-white font-medium py-2 px-4 rounded hover:bg-purple-600">Comment
-                                        </button>
-                                    </div>
-                                    <div id="comment-list-${post.id}" class="comment-list w-full space-y-4 mt-5">
-                                    ${ post.comments && post.comments.length > 0 
-                                        ? `<div id="comment-list-${post.id}" class="comment-list w-full space-y-4 mt-5"></div>`
-                                        : ''
-                                    }
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                            postsContainer.append(postHtml);
 
-                        postsContainer.append(postHtml);
+                            if (post.comments && post.comments.length > 0) {
+                                renderComments(post.comments, post.id);
+                            }
 
-                        if (post.comments && post.comments.length > 0) {
-                            renderComments(post.comments, post.id);
-                        }
+                    })
 
-                })
 
 
                 isLoading = true;
@@ -702,26 +719,39 @@
                 $('#loading-group').hide();
                 let groups; 
                 groups = response.data.data;    
-
-                if (groups.length === 0 || groups.length < 10) {
-                    hasGroup = true;
-                }
-
                 groupContainer = $('#has-group');
-                groups.forEach(function(group, index) {
-                    const renderGroup = `
-                    <a href="/group/${group.id}">
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="${group.thumnail_path ? group.thumnail_path : '/storage/uploads/groups/default-group.jpg'}" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">${group.name}</h3>
-                                <p class="text-xs text-gray-500">${group.about ? group.about : ''}</p>
+
+                if (groups.length < 10) {
+                    hasGroup = true;
+                    if (groups.length === 0) {
+                        const renderGroup = `
+                        <div class="flex items-center justify-center">
+                                        <div class="text-center">
+                                            <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                            </svg>
+                                            <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                            <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                        </div>
+                                    </div>
+                        `;
+                        groupContainer.append(renderGroup);
+                    } 
+                }
+                    groups.forEach(function(group, index) {
+                        const renderGroup = `
+                        <a href="/group/${group.id}">
+                            <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
+                                <img src="${group.thumnail_path ? group.thumnail_path : '/storage/uploads/groups/default-group.jpg'}" class="w-[48px] h-[48px] rounded-full" alt="">
+                                <div>
+                                    <h3 class="font-bold text-lg">${group.name}</h3>
+                                    <p class="text-xs text-gray-500">${group.about ? group.about : ''}</p>
+                                </div>
                             </div>
-                        </div>
-                    </a>
-                    `;
-                    groupContainer.append(renderGroup); 
-                });
+                        </a>
+                        `;
+                        groupContainer.append(renderGroup); 
+                    });
             }
         })
 
@@ -747,25 +777,39 @@
                 $('#loading-following').hide();
                 let groups; 
                 groups = response.data.data;    
-
-                if (groups.length === 0 || groups.length < 10) {
-                    hasFollow = true;
-                }
-
                 groupContainer = $('#following-container');
-                groups.forEach(function(group, index) {
-                    const renderGroup = `
-                    <a href="/profile/${group.user.id}">
-                        <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
-                            <img src="${group.user.avatar_path ? group.user.avatar_path : '/storage/uploads/groups/default-group.jpg'}" class="w-[48px] h-[48px] rounded-full" alt="">
-                            <div>
-                                <h3 class="font-bold text-lg">${group.user.name}</h3>
+
+                if (groups.length < 10) {
+                    hasFollow = true; 
+                    if (groups.length === 0 ) {
+                        const renderGroup = `
+                            <div class="flex items-center justify-center">
+                                            <div class="text-center">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12h4m-2-2v4m-5-6l-1 1m0 0l-1-1m1 1V7m0 0h5a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                                                </svg>
+                                                <h2 class="mt-2 text-sm font-medium text-gray-900">No Data Available</h2>
+                                                <p class="mt-1 text-sm text-gray-500">There is currently no data to display.</p>
+                                            </div>
+                                        </div>
+                            `;
+                        groupContainer.append(renderGroup);
+                    }
+
+                }
+                    groups.forEach(function(group, index) {
+                        const renderGroup = `
+                        <a href="/profile/${group.following.id}">
+                            <div class="flex items-center gap-3 mb-3 px-3 py-3 hover:bg-slate-600">
+                                <img src="${group.following.avatar_path ? group.following.avatar_path : '/storage/uploads/groups/default-group.jpg'}" class="w-[48px] h-[48px] rounded-full" alt="">
+                                <div>
+                                    <h3 class="font-bold text-lg">${group.following.name}</h3>
+                                </div>
                             </div>
-                        </div>
-                    </a>
-                    `;
-                    groupContainer.append(renderGroup); 
-                });
+                        </a>
+                        `;
+                        groupContainer.append(renderGroup); 
+                    });
             }
         })
 
@@ -1037,7 +1081,7 @@
 
                     const commentButton = $(`.comment-${postId}`);
                     const commentText = commentButton.find('.text-comment-count');
-                    commentText.text(`(${response.comments_count})`);
+                    commentText.text(`Comment (${response.comments_count})`);
                     
                 },
             });
@@ -1166,7 +1210,7 @@
                                 }
                                 const commentButton = $(`.comment-${postId}`);
                                 const commentText = commentButton.find('.text-comment-count');
-                                commentText.text(`(${response.comments_count})`);
+                                commentText.text(`Comment (${response.comments_count})`);
                             },
                         });
                     } else {
@@ -1243,7 +1287,6 @@
         $('.btn-attechment').on('change', function(event) {
             var files = event.target.files;
             var type = $(this).data('type');
-
             if (type == 1) {
                 var previewContainer = $('#file-preview');
             } else {

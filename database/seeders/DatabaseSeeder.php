@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\CommentLike;
+use App\Models\Follower;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\PostAttechment;
@@ -39,7 +40,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
         
-        $users = User::factory(20)->create();
+        $users = User::factory(50)->create();
 
         Group::factory(50)->create();
 
@@ -54,5 +55,7 @@ class DatabaseSeeder extends Seeder
         PostReaction::factory(300)->create();
 
         GroupUser::factory(200)->create();
+
+        Follower::factory(100)->create();
     }
 }
